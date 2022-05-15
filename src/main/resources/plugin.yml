@@ -1,0 +1,8 @@
+name: SmpCore
+version: '${project.version}'
+main: me.ikevoodoo.smpcore.testplugin.TestSMPPlugin
+api-version: 1.17
+prefix: SMPCore
+load: STARTUP
+authors: [ IkeVoodoo ]
+description: Main plugin for all of my smp plugin recreations

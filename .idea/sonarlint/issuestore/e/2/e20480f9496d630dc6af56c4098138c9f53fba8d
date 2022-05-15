@@ -1,0 +1,22 @@
+
+V
+java:S5993"9Change the visibility of this constructor to "protected".(úÎ¤8¬øå§‰0
+[
+java:S5993""9Change the visibility of this constructor to "protected".(Ó¼Ç¹ÿÿÿÿÿ8­øå§‰0
+t
+java:S3776'"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(Ú§÷îÿÿÿÿÿ8íøå§‰0
+z	java:S1313"YComplete cases by adding the missing enum constants or add a default case to this switch.(›ä¤œøÿÿÿÿ8õøå§‰0
+9
+java:S62054"Remove this redundant block.(Ú©™Ñ8öøå§‰0
+>
+java:S6205="Remove this redundant block.(±ğŠ°ÿÿÿÿÿ8÷øå§‰0
+>
+java:S6205C"Remove this redundant block.(À—ÙÅøÿÿÿÿ8ùøå§‰0
+M
+java:S1172i"+Remove this unused method parameter "args".(×€³úÿÿÿÿ8”ùå§‰0
+]
+java:S1172m"@Remove these unused method parameters "sender", "label", "args".(ÜïŸó8–ùå§‰0
+V
+java:S3400r"9Remove this method and declare a constant for this value.(¡´à°8—ùå§‰0
+J
+java:S1172q"-Remove this unused method parameter "sender".(ëáÛ8—ùå§‰0
