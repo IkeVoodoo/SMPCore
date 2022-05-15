@@ -36,7 +36,8 @@ public class MessageBuilder {
     public Message build() {
         ComponentBuilder componentBuilder = new ComponentBuilder();
         for (MessageComponent messageComponent : messageComponents) {
-            componentBuilder.append(messageComponent.getText())
+            componentBuilder
+                    .append(messageComponent.getText())
                     .color(messageComponent.getColor());
             for (MessageProperty property : messageComponent.getProperties()) {
                 switch (property) {
