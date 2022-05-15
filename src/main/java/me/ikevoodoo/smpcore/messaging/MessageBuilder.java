@@ -34,6 +34,7 @@ public class MessageBuilder {
     }
 
     public Message build() {
+        // https://www.spigotmc.org/wiki/the-chat-component-api/
         ComponentBuilder componentBuilder = new ComponentBuilder();
         for (MessageComponent messageComponent : messageComponents) {
             componentBuilder
