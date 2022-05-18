@@ -69,6 +69,21 @@ public class StringUtils {
                 .replaceAll("\\s+$", "");
     }
 
+    public static String slice(String input, int start, int end) {
+        int endIndex = end < 0 ? input.length() + end : end;
+        if(endIndex > input.length())
+            endIndex = input.length();
+        return input.substring(start > input.length() ? start % input.length() : start, endIndex);
+    }
+
+    public static String sliceFrom(String input, int start) {
+        return slice(input, start, Integer.MAX_VALUE);
+    }
+
+    public static String sliceTo(String input, int end) {
+        return slice(input, 0, end);
+    }
+
     public static long parseBanTime(String timeString) {
         var time = DateTimeFormatter.ofPattern("HH:mm:ss.SSSS").parse(timeString).query(TemporalQueries.localTime());
         // time's hours in milliseconds

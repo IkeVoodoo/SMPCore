@@ -2,11 +2,12 @@ package me.ikevoodoo.smpcore.shared;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.config.ConfigData;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public abstract class PluginProvider {
 
-    private SMPPlugin plugin;
+    private final SMPPlugin plugin;
 
     public PluginProvider(SMPPlugin plugin) {
         this.plugin = plugin;
@@ -25,15 +26,23 @@ public abstract class PluginProvider {
     }
 
     public final FileConfiguration getConfig(String name) {
-        return getPlugin().getConfigHandler().getConfig(name).getConfig();
+        return getConfigData(name).getConfig();
+    }
+
+    public final ConfigData getConfigData(String name) {
+        return getPlugin().getConfigHandler().getConfig(name);
     }
 
     public final void reloadConfig(String name) {
-        getPlugin().getConfigHandler().getConfig(name).reload();
+        getConfigData(name).reload();
     }
 
     public final void saveConfig(String name) {
-        getPlugin().getConfigHandler().getConfig(name).save();
+        getConfigData(name).save();
+    }
+
+    public final NamespacedKey makeKey(String key) {
+        return new NamespacedKey(plugin, key);
     }
 
 }

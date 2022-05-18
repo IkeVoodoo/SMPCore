@@ -8,6 +8,7 @@ import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
 import me.ikevoodoo.smpcore.config.annotations.Config;
 import me.ikevoodoo.smpcore.handlers.EliminationHandler;
+import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.listeners.*;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
@@ -28,10 +29,7 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static me.ikevoodoo.smpcore.senders.CustomSender.as;
@@ -53,6 +51,8 @@ public abstract class SMPPlugin extends JavaPlugin {
     private final CommandSender noLogConsole = createNewSender(as().noLog().console());
 
     private final Random random = new Random();
+
+    private final HashMap<String, CustomItem> customItems = new HashMap<>();
 
     @Override
     public final void onEnable() {
@@ -84,40 +84,48 @@ public abstract class SMPPlugin extends JavaPlugin {
         whenDisabled();
     }
 
-    public void reload() {
+    public void whenEnabled() {
+
+    }
+
+    public void whenDisabled() {
+
+    }
+
+    public final void reload() {
         reloadConfig();
         configHandler.reload();
     }
 
-    public EliminationHandler getEliminationHandler() {
+    public final EliminationHandler getEliminationHandler() {
         return eliminationHandler;
     }
 
-    public RecipeLoader getRecipeLoader() {
+    public final RecipeLoader getRecipeLoader() {
         return recipeLoader;
     }
 
-    public ConfigHelper getConfigHelper() {
+    public final ConfigHelper getConfigHelper() {
         return configHelper;
     }
 
-    public ConfigHandler getConfigHandler() {
+    public final ConfigHandler getConfigHandler() {
         return configHandler;
     }
 
-    public MaterialUtils getMaterialUtils() {
+    public final MaterialUtils getMaterialUtils() {
         return materialUtils;
     }
 
-    public Random getRandom() {
+    public final Random getRandom() {
         return random;
     }
 
-    public CommandSender getNoLogConsole() {
+    public final CommandSender getNoLogConsole() {
         return noLogConsole;
     }
 
-    public CommandSender getConsole() {
+    public final CommandSender getConsole() {
         return Bukkit.getConsoleSender();
     }
 
@@ -127,7 +135,7 @@ public abstract class SMPPlugin extends JavaPlugin {
      * @param key The namespaced key of the item.
      * @param callback The callback to run.
      * */
-    public void onUse(String key, PlayerUseItemCallback callback) {
+    public final void onUse(String key, PlayerUseItemCallback callback) {
         playerUseListener.addListener(key, callback);
     }
 
@@ -137,7 +145,7 @@ public abstract class SMPPlugin extends JavaPlugin {
      * @param key The namespaced key of the item.
      * @param callback The callback to run.
      * */
-    public void onUse(NamespacedKey key, PlayerUseItemCallback callback) {
+    public final void onUse(NamespacedKey key, PlayerUseItemCallback callback) {
         playerUseListener.addListener(key, callback);
     }
 
@@ -147,17 +155,17 @@ public abstract class SMPPlugin extends JavaPlugin {
      * @param key The namespaced key of the item.
      * @param callback The callback to run.
      * */
-    public void onPlace(String key, PlayerPlaceBlockCallback callback) {
+    public final void onPlace(String key, PlayerPlaceBlockCallback callback) {
         playerPlaceListener.addListener(key, callback);
     }
 
-    public void addCommand(String name, SMPCommand executor) {
+    public final void addCommand(String name, SMPCommand executor) {
         PluginCommand command = getCommand(name);
         assert command != null;
         command.setExecutor(executor);
     }
 
-    public void addCommand(SMPCommand command) {
+    public final void addCommand(SMPCommand command) {
         var cmd = getCommand(command.getName());
         if(cmd != null) {
             cmd.setExecutor(command);
@@ -167,58 +175,70 @@ public abstract class SMPPlugin extends JavaPlugin {
         CommandUtils.register(command);
     }
 
-    public void addCommands(List<SMPCommand> commands) {
+    public final void addCommands(List<SMPCommand> commands) {
         commands.forEach(this::addCommand);
     }
 
-    public void addCommand(String name, SMPCommand executor, TabCompleter completer) {
+    public final void addCommand(String name, SMPCommand executor, TabCompleter completer) {
         PluginCommand command = getCommand(name);
         assert command != null;
         command.setExecutor(executor);
         command.setTabCompleter(completer);
     }
 
-    public void registerListeners(Listener... listeners) {
+    public final void registerListeners(Listener... listeners) {
         for(Listener listener : listeners)
             getServer().getPluginManager().registerEvents(listener, this);
     }
 
-    public void registerListeners(List<Listener> listeners) {
+    public final void registerListeners(List<Listener> listeners) {
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
     }
-
-    public abstract void whenEnabled();
-    public abstract void whenDisabled();
 
 
     // CONFIG STUFF \\
 
-    public String getString(String path) {
+    public final String getString(String path) {
         return getConfig().getString(path);
     }
 
-    public int getInt(String path) {
+    public final int getInt(String path) {
         return getConfig().getInt(path);
     }
 
-    public boolean getBoolean(String path) {
+    public final boolean getBoolean(String path) {
         return getConfig().getBoolean(path);
     }
 
-    public double getDouble(String path) {
+    public final double getDouble(String path) {
         return getConfig().getDouble(path);
     }
 
-    public long getLong(String path) {
+    public final long getLong(String path) {
         return getConfig().getLong(path);
     }
 
-    public ConfigurationSection getSection(String path) {
+    public final ConfigurationSection getSection(String path) {
         return getConfig().getConfigurationSection(path);
     }
 
-    public void set(String path, Object value) {
+    public final void set(String path, Object value) {
         getConfig().set(path, value);
+    }
+
+    public final <T extends CustomItem> T getItem(String id, Class<T> type) {
+        CustomItem item = getItem(id);
+        if(item == null)
+            return null;
+        return (T) item;
+    }
+
+    public final CustomItem getItem(String id) {
+        return customItems.get(id);
+    }
+
+    public static SMPPlugin getById(String id) {
+        return Bukkit.getPluginManager().getPlugin(id) instanceof SMPPlugin smpPlugin ? smpPlugin : null;
     }
 
     private void registerDynamically() throws IOException, URISyntaxException {
@@ -231,6 +251,12 @@ public abstract class SMPPlugin extends JavaPlugin {
             Config config = clazz.getAnnotation(Config.class);
             ConfigData data = new ConfigData(this, config.value(), config.type(), clazz);
             getConfigHandler().registerConfig(data);
+        });
+
+        findItemClasses(classes).forEach(clazz -> {
+            CustomItem item = getClassInstance(clazz.asSubclass(CustomItem.class));
+            assert item != null;
+            customItems.put(item.getId(), item);
         });
     }
 
@@ -259,6 +285,10 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     private List<Class<?>> findConfigClasses(List<Class<?>> classes) {
         return classes == null ? new ArrayList<>() : classes.stream().filter(clazz -> clazz.isAnnotationPresent(Config.class)).toList();
+    }
+
+    private List<Class<?>> findItemClasses(List<Class<?>> classes) {
+        return classes == null ? new ArrayList<>() : classes.stream().filter(CustomItem.class::isAssignableFrom).toList();
     }
 
     private List<Class<?>> getAllClasses(String packageName) throws URISyntaxException, IOException {
@@ -337,23 +367,18 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     private List<Class<?>> findClasses(File directory, String pkgName) throws ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
-        if(directory.exists()) {
+        if (directory.exists()) {
             File[] files = directory.listFiles();
-            for(File file : files) {
-                if(file.isDirectory()) {
+            for (File file : files) {
+                if (file.isDirectory()) {
                     assert !file.getName().contains(".");
                     classes.addAll(findClasses(file, pkgName + "." + file.getName()));
-                } else if(file.getName().endsWith(".class")) {
+                } else if (file.getName().endsWith(".class")) {
                     classes.add(Class.forName(pkgName + '.' + file.getName().substring(0, file.getName().length() - 6), false, Thread.currentThread().getContextClassLoader()));
                 }
             }
         }
         return classes.stream().filter(clazz -> clazz.isAssignableFrom(Listener.class)).toList();
     }
-
-    public static SMPPlugin getById(String id) {
-        return Bukkit.getPluginManager().getPlugin(id) instanceof SMPPlugin smpPlugin ? smpPlugin : null;
-    }
-
 
 }

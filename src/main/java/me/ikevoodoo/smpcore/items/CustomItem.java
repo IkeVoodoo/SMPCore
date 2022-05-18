@@ -6,6 +6,7 @@ import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
@@ -33,9 +34,15 @@ public abstract class CustomItem extends PluginProvider {
 
     private final CustomItemData data = new CustomItemData();
     private Pair<NamespacedKey, Recipe> recipe;
+    private final String id;
 
-    public CustomItem(SMPPlugin plugin) {
+    public CustomItem(SMPPlugin plugin, String id) {
         super(plugin);
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public static void give(Player player, CustomItem customItem) {
@@ -150,5 +157,17 @@ public abstract class CustomItem extends PluginProvider {
         return setDisplayName(() -> getConfig().getString(path + ".displayName", getConfig().getString(path + ".name", null)))
                 .setLore(() -> getConfig().getStringList(path + ".lore"))
                 .setCustomModelData(() -> getConfig().getInt(path + ".customModelData", -1));
+    }
+
+    public final CustomItem bindConfig(String path, String key) {
+        return bindConfig(path + "." + key);
+    }
+
+    public final CustomItem bindConfig(ConfigurationSection section) {
+        return bindConfig(section.getCurrentPath());
+    }
+
+    public final CustomItem bindConfig(ConfigurationSection section, String key) {
+        return bindConfig(section.getCurrentPath(), key);
     }
 }

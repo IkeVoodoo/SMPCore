@@ -106,7 +106,6 @@ public class ConfigData {
     }
 
     private void set(Class<?> clazz, Object o, ConfigurationSection section) {
-
         for(Field field : clazz.getFields()) {
             try {
                 if(field.getType().isAnnotationPresent(Config.class)) {
@@ -141,6 +140,11 @@ public class ConfigData {
                         }
                         continue;
                     }
+                }
+
+                if(field.isEnumConstant()) {
+                    section.set(field.getName(), value.toString());
+                    continue;
                 }
 
                 section.set(field.getName(), value);
@@ -188,8 +192,20 @@ public class ConfigData {
                 }
 
                 Object val = config.get(field.getName(), defaults.get(field.getName()));
-                if(val != null)
-                    field.set(null, val);
+                if(val == null)
+                    continue;
+
+                if(field.getType().isEnum()) {
+                    for (Object o : field.getType().getEnumConstants()) {
+                        if(o.toString().equals(val.toString())) {
+                            field.set(null, o);
+                            break;
+                        }
+                    }
+                    continue;
+                }
+
+                field.set(null, val);
             } catch (IllegalAccessException | ClassNotFoundException ignored) {}
         }
         for(Class<?> nested : clazz.getDeclaredClasses()) {
