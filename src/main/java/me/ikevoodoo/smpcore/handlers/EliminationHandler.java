@@ -3,38 +3,52 @@ package me.ikevoodoo.smpcore.handlers;
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.callbacks.eliminations.EliminationCallback;
 import me.ikevoodoo.smpcore.callbacks.eliminations.EliminationType;
+import me.ikevoodoo.smpcore.shared.PluginProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public final class EliminationHandler {
+public final class EliminationHandler extends PluginProvider {
 
-    private final SMPPlugin plugin;
     private final NamespacedKey eliminationKey;
 
     private final List<EliminationCallback> eliminationCallbacks = new ArrayList<>();
     private final List<EliminationCallback> reviveCallbacks = new ArrayList<>();
 
     public EliminationHandler(SMPPlugin plugin) {
-        this.plugin = plugin;
-        eliminationKey = new NamespacedKey(plugin, "eliminated_player");
+        super(plugin);
+        eliminationKey = makeKey("eliminated_player");
     }
 
     public void eliminate(Player player) {
         eliminate(player, Long.MAX_VALUE);
     }
 
+    public void eliminate(UUID id) {
+        Player player = Bukkit.getPlayer(id);
+        if(player != null) {
+            eliminate(player);
+        }
+    }
+
     public void eliminate(Player player, long banTime) {
         PersistentDataContainer container = player.getPersistentDataContainer();
         container.set(eliminationKey, PersistentDataType.LONG, banTime);
         eliminationCallbacks.forEach(callback -> callback.whenTriggered(EliminationType.ELIMINATED, player));
+    }
+
+    public void eliminate(UUID id, long banTime) {
+        Player player = Bukkit.getPlayer(id);
+        if(player != null) {
+            eliminate(player, banTime);
+        }
     }
 
     public boolean isEliminated(Player player) {
@@ -54,12 +68,29 @@ public final class EliminationHandler {
         reviveCallbacks.forEach(callback -> callback.whenTriggered(EliminationType.REVIVED, player));
     }
 
+    public void revive(UUID id) {
+        Player player = Bukkit.getPlayer(id);
+        if(player != null) {
+            revive(player);
+        }
+    }
+
     public void reviveAll() {
         Bukkit.getOnlinePlayers().forEach(this::revive);
+        for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+            reviveOffline(offlinePlayer);
+        }
     }
 
     public void eliminateAll() {
-        Bukkit.getOnlinePlayers().forEach(this::eliminate);
+        eliminateAll(Long.MAX_VALUE);
+    }
+
+    public void eliminateAll(long banTime) {
+        Bukkit.getOnlinePlayers().forEach(player -> eliminate(player, banTime));
+        for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+            eliminateOffline(offlinePlayer, banTime);
+        }
     }
 
     public void listen(EliminationType type, EliminationCallback callback) {
@@ -72,8 +103,15 @@ public final class EliminationHandler {
     }
 
     public void reviveOffline(OfflinePlayer player) {
-
+        getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), this::revive);
     }
 
+    public void eliminateOffline(OfflinePlayer player) {
+        eliminateOffline(player, Long.MAX_VALUE);
+    }
+
+    public void eliminateOffline(OfflinePlayer player, long banTime) {
+        getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), id -> eliminate(id, banTime));
+    }
     
 }

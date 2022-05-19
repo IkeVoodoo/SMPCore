@@ -24,9 +24,17 @@ public class MessageBuilder {
         return add().text(text);
     }
 
+    public MessageBuilder add(String text, ChatColor color) {
+        return add(text).color(color);
+    }
+
     public MessageBuilder text(String text) {
         last().setText(text);
         return this;
+    }
+
+    public MessageBuilder text(String text, ChatColor color) {
+        return text(text).color(color);
     }
 
     public MessageBuilder color(ChatColor color) {
@@ -49,6 +57,22 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder link(String url) {
+        return click(ClickEvent.Action.OPEN_URL, url);
+    }
+
+    public MessageBuilder link(String url, String text) {
+        return add(text).link(url);
+    }
+
+    public MessageBuilder link(String url, ChatColor color) {
+        return click(ClickEvent.Action.OPEN_URL, url).color(color);
+    }
+
+    public MessageBuilder link(String url, String text, ChatColor color) {
+        return add(text, color).link(url);
+    }
+
     public Message build() {
         // https://www.spigotmc.org/wiki/the-chat-component-api/
         ComponentBuilder componentBuilder = new ComponentBuilder();
@@ -65,6 +89,8 @@ public class MessageBuilder {
                     case STRIKETHROUGH -> componentBuilder.strikethrough(true);
                     case UNDERLINE -> componentBuilder.underlined(true);
                     case OBFUSCATED -> componentBuilder.obfuscated(true);
+                    case RESET -> componentBuilder.reset();
+                    default -> throw new IllegalArgumentException("Unknown property: " + property);
                 }
             }
 

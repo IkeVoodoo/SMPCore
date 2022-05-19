@@ -8,6 +8,8 @@ import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
 import me.ikevoodoo.smpcore.config.annotations.Config;
 import me.ikevoodoo.smpcore.handlers.EliminationHandler;
+import me.ikevoodoo.smpcore.handlers.JoinActionHandler;
+import me.ikevoodoo.smpcore.handlers.ResourcePackHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.listeners.*;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
@@ -39,6 +41,9 @@ import static me.ikevoodoo.smpcore.senders.SenderBuilder.createNewSender;
 public abstract class SMPPlugin extends JavaPlugin {
 
     private EliminationHandler eliminationHandler;
+    private JoinActionHandler joinActionHandler;
+    private ResourcePackHandler resourcePackHandler;
+
     private RecipeLoader recipeLoader;
     private PlayerUseListener playerUseListener;
     private PlayerPlaceListener playerPlaceListener;
@@ -57,6 +62,7 @@ public abstract class SMPPlugin extends JavaPlugin {
     @Override
     public final void onEnable() {
         eliminationHandler = new EliminationHandler(this);
+        joinActionHandler = new JoinActionHandler(this);
         recipeLoader = new RecipeLoader(this);
         playerUseListener = new PlayerUseListener(this);
         playerPlaceListener = new PlayerPlaceListener(this);
@@ -99,6 +105,14 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     public final EliminationHandler getEliminationHandler() {
         return eliminationHandler;
+    }
+
+    public final JoinActionHandler getJoinActionHandler() {
+        return joinActionHandler;
+    }
+
+    public final ResourcePackHandler getResourcePackHandler() {
+        return resourcePackHandler;
     }
 
     public final RecipeLoader getRecipeLoader() {
@@ -226,15 +240,11 @@ public abstract class SMPPlugin extends JavaPlugin {
         getConfig().set(path, value);
     }
 
-    public final <T extends CustomItem> T getItem(String id, Class<T> type) {
-        CustomItem item = getItem(id);
+    public final <T extends CustomItem> Optional<T> getItem(String id) {
+        CustomItem item = customItems.get(id);
         if(item == null)
-            return null;
-        return (T) item;
-    }
-
-    public final CustomItem getItem(String id) {
-        return customItems.get(id);
+            return Optional.empty();
+        return Optional.of((T) item);
     }
 
     public static SMPPlugin getById(String id) {
@@ -300,8 +310,10 @@ public abstract class SMPPlugin extends JavaPlugin {
         if(pkg.getScheme().equals("jar")) {
             try {
                 root = FileSystems.getFileSystem(pkg).getPath(packagePath);
-            } catch(FileSystemNotFoundException e) {
-                root = FileSystems.newFileSystem(pkg, Collections.emptyMap()).getPath(packagePath);
+            } finally {
+                try(FileSystem zip = FileSystems.newFileSystem(pkg, Collections.emptyMap())) {
+                    root = zip.getPath(packagePath);
+                }
             }
         } else {
             root = Paths.get(pkg);
@@ -352,14 +364,14 @@ public abstract class SMPPlugin extends JavaPlugin {
 
         T generic;
         try {
-            try {
-                generic = constr.newInstance(toProvide);
-            } catch (InstantiationException e) {
-                generic = constr.newInstance();
-            }
+            generic = constr.newInstance(toProvide);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            try {
+                generic = constr.newInstance();
+            } catch (Exception e1) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         return generic;
@@ -369,6 +381,8 @@ public abstract class SMPPlugin extends JavaPlugin {
         List<Class<?>> classes = new ArrayList<>();
         if (directory.exists()) {
             File[] files = directory.listFiles();
+            if(files == null)
+                return classes;
             for (File file : files) {
                 if (file.isDirectory()) {
                     assert !file.getName().contains(".");

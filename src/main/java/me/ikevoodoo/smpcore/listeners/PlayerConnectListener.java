@@ -4,6 +4,7 @@ import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.handlers.EliminationHandler;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerConnectListener implements Listener {
@@ -16,6 +17,8 @@ public class PlayerConnectListener implements Listener {
 
     @EventHandler
     public void on(PlayerJoinEvent e) {
+        plugin.getJoinActionHandler().fire(e.getPlayer().getUniqueId());
+
         EliminationHandler handler = plugin.getEliminationHandler();
         if(handler.isEliminated(e.getPlayer())) {
             long banTime = handler.getBanTime(e.getPlayer());
