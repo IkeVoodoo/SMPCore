@@ -8,13 +8,14 @@ import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
 import me.ikevoodoo.smpcore.config.annotations.Config;
 import me.ikevoodoo.smpcore.handlers.EliminationHandler;
+import me.ikevoodoo.smpcore.handlers.InventoryActionHandler;
 import me.ikevoodoo.smpcore.handlers.JoinActionHandler;
 import me.ikevoodoo.smpcore.handlers.ResourcePackHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.listeners.*;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
-import me.ikevoodoo.smpcore.utils.RecipeLoader;
+import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -42,6 +43,7 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     private EliminationHandler eliminationHandler;
     private JoinActionHandler joinActionHandler;
+    private InventoryActionHandler inventoryActionHandler;
     private ResourcePackHandler resourcePackHandler;
 
     private RecipeLoader recipeLoader;
@@ -63,6 +65,7 @@ public abstract class SMPPlugin extends JavaPlugin {
     public final void onEnable() {
         eliminationHandler = new EliminationHandler(this);
         joinActionHandler = new JoinActionHandler(this);
+        inventoryActionHandler = new InventoryActionHandler(this);
         recipeLoader = new RecipeLoader(this);
         playerUseListener = new PlayerUseListener(this);
         playerPlaceListener = new PlayerPlaceListener(this);
@@ -71,7 +74,8 @@ public abstract class SMPPlugin extends JavaPlugin {
                 playerUseListener,
                 playerPlaceListener,
                 new PlayerDamageListener(),
-                new PlayerSleepListener()
+                new PlayerSleepListener(),
+                new InventoryEditListener(this)
         );
         configHandler = new ConfigHandler();
         try {
@@ -109,6 +113,10 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     public final JoinActionHandler getJoinActionHandler() {
         return joinActionHandler;
+    }
+
+    public final InventoryActionHandler getInventoryActionHandler() {
+        return inventoryActionHandler;
     }
 
     public final ResourcePackHandler getResourcePackHandler() {

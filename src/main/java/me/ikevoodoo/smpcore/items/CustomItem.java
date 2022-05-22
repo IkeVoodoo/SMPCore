@@ -1,14 +1,17 @@
 package me.ikevoodoo.smpcore.items;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.recipes.RecipeOptions;
 import me.ikevoodoo.smpcore.shared.PluginProvider;
 import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,6 +20,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -35,6 +39,11 @@ public abstract class CustomItem extends PluginProvider {
     private final CustomItemData data = new CustomItemData();
     private Pair<NamespacedKey, Recipe> recipe;
     private final String id;
+
+    private Consumer<Player> unlockOnJoin;
+    private Consumer<Player> unlockOnObtain;
+
+    private Supplier<RecipeOptions> optionsSupplier = () -> new RecipeOptions(Material.STONE, 1, true);
 
     public CustomItem(SMPPlugin plugin, String id) {
         super(plugin);
@@ -76,6 +85,7 @@ public abstract class CustomItem extends PluginProvider {
             itemMeta.setCustomModelData(customModelData);
 
         itemStack.setItemMeta(itemMeta);
+        itemStack.setAmount(getRecipeOptions().amount());
         return itemStack;
     }
 
@@ -88,8 +98,40 @@ public abstract class CustomItem extends PluginProvider {
         return itemStack;
     }
 
+    public final RecipeOptions getRecipeOptions() {
+        return optionsSupplier.get();
+    }
+
+    public final CustomItem unlockOnJoin() {
+        clearConsumers();
+        unlockOnJoin = getPlugin().getJoinActionHandler().runAlwaysOnJoin(player -> {
+            NamespacedKey key = recipe == null ? null : recipe.getFirst();
+            if(key == null)
+                return;
+            player.discoverRecipe(key);
+        });
+        return this;
+    }
+
+    public final CustomItem unlockOnObtain(Material... materials) {
+        clearConsumers();
+        unlockOnObtain = getPlugin().getInventoryActionHandler().onInventoryAction(player -> {
+            Inventory inventory = player.getInventory();
+            for (Material material : materials) {
+                if(!inventory.contains(material)) {
+                    return;
+                }
+            }
+            NamespacedKey key = recipe == null ? null : recipe.getFirst();
+            if(key == null)
+                return;
+            player.discoverRecipe(key);
+        });
+        return this;
+    }
+
     public final CustomItem addKey(String key) {
-        NamespacedKey namespacedKey = new NamespacedKey(getPlugin(), key);
+        NamespacedKey namespacedKey = makeKey(key);
         keys.add(namespacedKey);
         getPlugin().onUse(key, (plr, item, action) -> {
             ItemClickResult result = onClick(plr, item, action);
@@ -152,11 +194,22 @@ public abstract class CustomItem extends PluginProvider {
             data.customModelData = customModelData;
         return this;
     }
+
+    public final CustomItem setOptions(Supplier<RecipeOptions> options) {
+        if(options != null)
+            optionsSupplier = options;
+        return this;
+    }
     
     public final CustomItem bindConfig(String path) {
         return setDisplayName(() -> getConfig().getString(path + ".displayName", getConfig().getString(path + ".name", null)))
                 .setLore(() -> getConfig().getStringList(path + ".lore"))
                 .setCustomModelData(() -> getConfig().getInt(path + ".customModelData", -1));
+    }
+
+    public final CustomItem bindConfigOptions(ConfigurationSection section) {
+        optionsSupplier = () -> getPlugin().getRecipeLoader().getOptions(section);
+        return this;
     }
 
     public final CustomItem bindConfig(String path, String key) {
@@ -169,5 +222,15 @@ public abstract class CustomItem extends PluginProvider {
 
     public final CustomItem bindConfig(ConfigurationSection section, String key) {
         return bindConfig(section.getCurrentPath(), key);
+    }
+
+    private void clearConsumers() {
+        if(unlockOnJoin != null)
+            getPlugin().getJoinActionHandler().cancelAlwaysOnJoin(unlockOnJoin);
+        if(unlockOnObtain != null)
+            getPlugin().getInventoryActionHandler().removeInventoryAction(unlockOnObtain);
+
+        unlockOnJoin = null;
+        unlockOnObtain = null;
     }
 }

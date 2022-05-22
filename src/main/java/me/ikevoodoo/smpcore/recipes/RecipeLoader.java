@@ -1,14 +1,17 @@
-package me.ikevoodoo.smpcore.utils;
+package me.ikevoodoo.smpcore.recipes;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.utils.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -42,6 +45,10 @@ public class RecipeLoader {
                 .replace(":", "");
     }
 
+    private Material fromString(String mat) {
+        return Material.getMaterial(fix(mat));
+    }
+
     /**
      * Requires the following format:
      *
@@ -50,7 +57,7 @@ public class RecipeLoader {
      *     item: item id
      *
      * */
-    private Material[] getMaterials(FileConfiguration config, String path) {
+    private Material[] getMaterials(ConfigurationSection config, String path) {
         Material[] materials = Arrays.stream(new Material[9]).map(m -> Material.AIR).toArray(Material[]::new);
 
         if(!config.isConfigurationSection(path)) {
@@ -79,24 +86,56 @@ public class RecipeLoader {
         return materials;
     }
 
-    public Recipe getRecipe(FileConfiguration config, String path, ItemStack output, NamespacedKey key, boolean shaped) {
+    public RecipeData getRecipe(ConfigurationSection config, String path, ItemStack output, NamespacedKey key, boolean shaped) {
         Material[] materials = getMaterials(config, path);
         if(shaped) {
             ShapedRecipe recipe = new ShapedRecipe(key, output);
             recipe.shape("012", "345", "678");
             for(int i = 0; i < materials.length; i++)
                 recipe.setIngredient((i + "").charAt(0), materials[i]);
-            return recipe;
+            return new RecipeData(recipe, materials);
         }
 
         ShapelessRecipe recipe = new ShapelessRecipe(key, output);
         for(Material mat : materials)
             recipe.addIngredient(mat);
-        return recipe;
+        return new RecipeData(recipe, materials);
     }
 
-    public Recipe getRecipe(String path, ItemStack output, NamespacedKey key, boolean shaped) {
+    public RecipeData getRecipe(String path, ItemStack output, NamespacedKey key, boolean shaped) {
         return getRecipe(plugin.getConfig(), path, output, key, shaped);
+    }
+
+    public RecipeData getRecipe(ConfigurationSection config, String path, ItemStack output, NamespacedKey key, RecipeOptions options) {
+        return getRecipe(config, path, output, key, options.shaped());
+    }
+
+    public RecipeOptions getOptions(ConfigurationSection config) {
+        return new RecipeOptions(
+                fromString(config.getString("type")),
+                config.getInt("outputAmount"),
+                config.getBoolean("shaped")
+        );
+    }
+
+    public RecipeOptions getOptions(String path) {
+        return getOptions(plugin.getConfig().getConfigurationSection(path));
+    }
+
+    public void writeRecipe(File file, RecipeData recipe) {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        Material[] materials = recipe.materials();
+        for(int i = 0; i < materials.length; i++) {
+            config.set("recipe." + (i + 1) + ".item", toReadable(materials[i]));
+        }
+        config.set("options.item", toReadable(recipe.recipe().getResult().getType()));
+        config.set("options.shaped", recipe.recipe() instanceof ShapedRecipe);
+        config.set("options.outputAmount", recipe.recipe().getResult().getAmount());
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

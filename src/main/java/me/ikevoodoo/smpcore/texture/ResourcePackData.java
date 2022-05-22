@@ -2,20 +2,20 @@ package me.ikevoodoo.smpcore.texture;
 
 import java.util.Arrays;
 
-public record ResourcePackData(String url, byte[] hash) {
+public record ResourcePackData(String location, byte[] hash) {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ResourcePackData data && url.equals(data.url) && Arrays.equals(hash, data.hash);
+        return obj instanceof ResourcePackData data && location.equals(data.location) && Arrays.equals(hash, data.hash);
     }
 
     @Override
     public int hashCode() {
-        return url.hashCode() ^ Arrays.hashCode(hash);
+        return location.hashCode() ^ Arrays.hashCode(hash);
     }
 
     @Override
     public String toString() {
-        return "TexturePackData[url=" + this.url + "]";
+        return "TexturePackData[location=" + this.location + "]";
     }
 }

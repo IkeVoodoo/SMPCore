@@ -4,12 +4,15 @@ import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.config.ConfigData;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
 
 public abstract class PluginProvider {
 
     private final SMPPlugin plugin;
 
-    public PluginProvider(SMPPlugin plugin) {
+    protected PluginProvider(SMPPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -43,6 +46,10 @@ public abstract class PluginProvider {
 
     public final NamespacedKey makeKey(String key) {
         return new NamespacedKey(plugin, key);
+    }
+
+    public final YamlConfiguration getYamlConfig(String name) {
+        return YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), name));
     }
 
 }
