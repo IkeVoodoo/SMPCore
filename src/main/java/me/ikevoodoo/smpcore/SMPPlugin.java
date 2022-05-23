@@ -1,5 +1,7 @@
 package me.ikevoodoo.smpcore;
 
+import me.ikevoodoo.smpcore.annotations.NoInject;
+import me.ikevoodoo.smpcore.annotations.Property;
 import me.ikevoodoo.smpcore.callbacks.blocks.PlayerPlaceBlockCallback;
 import me.ikevoodoo.smpcore.callbacks.items.PlayerUseItemCallback;
 import me.ikevoodoo.smpcore.commands.SMPCommand;
@@ -14,9 +16,9 @@ import me.ikevoodoo.smpcore.handlers.ResourcePackHandler;
 import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.listeners.*;
+import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
-import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -29,7 +31,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
@@ -328,10 +332,8 @@ public abstract class SMPPlugin extends JavaPlugin {
         if(pkg.getScheme().equals("jar")) {
             try {
                 root = FileSystems.getFileSystem(pkg).getPath(packagePath);
-            } finally {
-                try(FileSystem zip = FileSystems.newFileSystem(pkg, Collections.emptyMap())) {
-                    root = zip.getPath(packagePath);
-                }
+            } catch (final FileSystemNotFoundException e) {
+                root = FileSystems.newFileSystem(pkg, Collections.emptyMap()).getPath(packagePath);
             }
         } else {
             root = Paths.get(pkg);
@@ -354,20 +356,19 @@ public abstract class SMPPlugin extends JavaPlugin {
     private <T> T getClassInstance(Class<? extends T> clazz) {
         Constructor<?>[] constructors = clazz.getConstructors();
         Constructor<? extends T> constr = null;
-        Object toProvide = null;
+        Object[] params = null;
         try {
             for(Constructor<?> constructor : constructors) {
+                if(constructor.isAnnotationPresent(NoInject.class))
+                    continue;
+
                 if(constructor.getParameterCount() == 0 && constr == null)
                     constr = clazz.getDeclaredConstructor();
 
-                if(constructor.getParameterCount() == 1 && constructor.getParameterTypes()[0] == SMPPlugin.class) {
-                    toProvide = this;
+                if(constructor.getParameterCount() >= 1 && constructor.getParameterTypes()[0] == SMPPlugin.class) {
+                    params = new Object[constructor.getParameterCount()];
+                    params[0] = this;
                     constr = clazz.getDeclaredConstructor(SMPPlugin.class);
-                }
-
-                if(constructor.getParameterCount() == 1 && constructor.getParameterTypes()[0] == JavaPlugin.class) {
-                    toProvide = this;
-                    constr = clazz.getDeclaredConstructor(JavaPlugin.class);
                 }
 
             }
@@ -380,9 +381,55 @@ public abstract class SMPPlugin extends JavaPlugin {
             return null;
         }
 
+        for (Parameter parameter : constr.getParameters()) {
+            if(parameter.isAnnotationPresent(Property.class)) {
+                Property annotation = parameter.getAnnotation(Property.class);
+                String key = annotation.value().toLowerCase(Locale.ROOT);
+                if(key.isEmpty())
+                    throw new IllegalArgumentException("Property key cannot be empty at class " + clazz.getName() + "(" + getConstructorParams(constr) + ")");
+                Object val = switch(key) {
+                    case "time.ms" -> System.currentTimeMillis();
+                    case "time.ns" -> System.nanoTime();
+                    case "random.uuid" -> UUID.randomUUID();
+                    case "server.players" -> Bukkit.getOnlinePlayers();
+                    case "server.players.count" -> Bukkit.getOnlinePlayers().size();
+
+                    default -> {
+                        if(key.startsWith("server.players.uuid.")) {
+                            String uuid = key.substring("server.players.uuid.".length());
+                            yield Bukkit.getPlayer(UUID.fromString(uuid));
+                        }
+
+                        if(key.startsWith("server.players.")) {
+                            String playerName = key.substring("server.players.".length());
+                            yield Bukkit.getPlayer(playerName);
+                        }
+
+
+                        if(key.startsWith("server.online.uuid.")) {
+                            String uuid = key.substring("server.online.uuid.".length());
+                            yield Bukkit.getPlayer(UUID.fromString(uuid)) != null;
+                        }
+
+                        if(key.startsWith("server.online.")) {
+                            String playerName = key.substring("server.online.".length());
+                            yield Bukkit.getPlayer(playerName) != null;
+                        }
+
+
+
+                        yield null;
+                    }
+                };
+
+                // TODO for the morning: Check if the value is of the same type as the parameter, if it is not, throw an exception, if it is null, just pass null
+                // TODO added at 11:30PM 5/23/2022 CET time
+            }
+        }
+
         T generic;
         try {
-            generic = constr.newInstance(toProvide);
+            generic = constr.newInstance(params);
         } catch (Exception e) {
             try {
                 generic = constr.newInstance();
@@ -393,6 +440,18 @@ public abstract class SMPPlugin extends JavaPlugin {
         }
 
         return generic;
+    }
+
+    private String getConstructorParams(Constructor<?> constr) {
+        StringBuilder sb = new StringBuilder();
+        for(Parameter parameter : constr.getParameters()) {
+            // annotations, is array, is primitive, is generic etc
+            for(Annotation annotation : parameter.getAnnotations()) {
+                sb.append(annotation.toString()).append(" ");
+            }
+            sb.append(parameter.getType().getName()).append(", ");
+        }
+        return sb.toString().trim();
     }
 
     private List<Class<?>> findClasses(File directory, String pkgName) throws ClassNotFoundException {
