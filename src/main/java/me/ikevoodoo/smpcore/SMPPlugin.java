@@ -11,6 +11,7 @@ import me.ikevoodoo.smpcore.handlers.EliminationHandler;
 import me.ikevoodoo.smpcore.handlers.InventoryActionHandler;
 import me.ikevoodoo.smpcore.handlers.JoinActionHandler;
 import me.ikevoodoo.smpcore.handlers.ResourcePackHandler;
+import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.listeners.*;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
@@ -45,6 +46,7 @@ public abstract class SMPPlugin extends JavaPlugin {
     private JoinActionHandler joinActionHandler;
     private InventoryActionHandler inventoryActionHandler;
     private ResourcePackHandler resourcePackHandler;
+    private ChatInputHandler chatInputHandler;
 
     private RecipeLoader recipeLoader;
     private PlayerUseListener playerUseListener;
@@ -66,6 +68,9 @@ public abstract class SMPPlugin extends JavaPlugin {
         eliminationHandler = new EliminationHandler(this);
         joinActionHandler = new JoinActionHandler(this);
         inventoryActionHandler = new InventoryActionHandler(this);
+        resourcePackHandler = new ResourcePackHandler(this);
+        chatInputHandler = new ChatInputHandler(this);
+
         recipeLoader = new RecipeLoader(this);
         playerUseListener = new PlayerUseListener(this);
         playerPlaceListener = new PlayerPlaceListener(this);
@@ -75,7 +80,8 @@ public abstract class SMPPlugin extends JavaPlugin {
                 playerPlaceListener,
                 new PlayerDamageListener(),
                 new PlayerSleepListener(),
-                new InventoryEditListener(this)
+                new InventoryEditListener(this),
+                new ChatMessageListener(this)
         );
         configHandler = new ConfigHandler();
         try {
@@ -121,6 +127,10 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     public final ResourcePackHandler getResourcePackHandler() {
         return resourcePackHandler;
+    }
+
+    public final ChatInputHandler getChatInputHandler() {
+        return chatInputHandler;
     }
 
     public final RecipeLoader getRecipeLoader() {
