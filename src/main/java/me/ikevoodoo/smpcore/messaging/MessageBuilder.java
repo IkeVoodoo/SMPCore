@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MessageBuilder {
 
-    private List<MessageComponent> messageComponents = new ArrayList<>();
+    private final List<MessageComponent> messageComponents = new ArrayList<>();
 
     // Starts a component
     public MessageBuilder add() {

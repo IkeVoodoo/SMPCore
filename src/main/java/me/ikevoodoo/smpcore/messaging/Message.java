@@ -39,7 +39,7 @@ public class Message {
     public Message broadcast(World world) {
         for (Player player : world.getPlayers())
             player.spigot().sendMessage(msg);
-        return log("[§cWB§r] " + world.getName() + ": ");
+        return log();
     }
     
     public Message log() {
