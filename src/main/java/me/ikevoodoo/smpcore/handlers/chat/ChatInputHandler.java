@@ -23,9 +23,9 @@ public class ChatInputHandler extends PluginProvider {
     }
 
     public void onChatInput(Player player, Function<String, Boolean> consumer, String... messages) {
-        onChatInput(player.getUniqueId(), consumer);
         for (String message : messages)
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        onChatInput(player.getUniqueId(), consumer);
     }
 
     public boolean hasListener(UUID id) {
