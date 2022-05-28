@@ -18,7 +18,7 @@ public class HealthUtils {
     }
 
     public static boolean setIfWithin(double amount, double min, double max, LivingEntity entity) {
-        if(amount >= min && amount <= max) {
+        if(amount > min && amount <= max) {
             set(amount, entity);
             return true;
         }

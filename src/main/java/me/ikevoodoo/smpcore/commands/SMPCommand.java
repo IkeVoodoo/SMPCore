@@ -16,6 +16,7 @@ import java.util.UUID;
 public abstract class SMPCommand extends PluginProvider implements CommandExecutor {
 
     private final List<SMPCommand> subCommands;
+    private SMPCommand parent;
     private final String name;
     private final HashMap<UUID, Long> cooldowns;
 
@@ -44,7 +45,18 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
         Arguments arguments = new Arguments(sender, args);
         if (!arguments.match(this.args)) {
-            sender.sendMessage(getInvalidArgsMessage(sender, label, arguments));
+            // get the sub command
+            if(args.length > 0) {
+                SMPCommand subCommand = getSubCommand(args[0]);
+                if(subCommand != null) {
+                    String msg = subCommand.getInvalidArgsMessage(sender, subCommand.name, arguments);
+                    if(this.parent == null) {
+                        sender.sendMessage(getInvalidArgsPrefix(sender, subCommand.name, arguments) + msg);
+                        return true;
+                    }
+                }
+            }
+            sender.sendMessage(getInvalidArgsPrefix(sender, label, arguments) + getInvalidArgsMessage(sender, label, arguments));
             return true;
         }
 
@@ -70,16 +82,16 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
                     return true;
                 }
             }
+            default -> {}
         }
 
         if (args.length == 0) {
             return this.execute(sender, arguments);
         }
 
-        for (SMPCommand subCommand : this.subCommands) {
-            if (subCommand.getName().equalsIgnoreCase(args[0])) {
-                return subCommand.onCommand(sender, command, label, List.of(args).subList(1, args.length).toArray(new String[0]));
-            }
+        SMPCommand subCommand = getSubCommand(args[0]);
+        if (subCommand != null) {
+            return subCommand.onCommand(sender, command, label, List.of(args).subList(1, args.length).toArray(new String[0]));
         }
 
         boolean res = this.execute(sender, arguments);
@@ -89,6 +101,15 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
                 sender.sendMessage(successMessage);
         }
         return res;
+    }
+
+    private final SMPCommand getSubCommand(String name) {
+        for (SMPCommand subCommand : this.subCommands) {
+            if (subCommand.getName().equalsIgnoreCase(name)) {
+                return subCommand;
+            }
+        }
+        return null;
     }
 
     public abstract boolean execute(CommandSender sender, Arguments args);
@@ -102,8 +123,12 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         };
     }
 
+    public String getInvalidArgsPrefix(CommandSender sender, String label, Arguments args) {
+        return "§cUsage: §f/";
+    }
+
     public String getInvalidArgsMessage(CommandSender sender, String label, Arguments args) {
-        return "§cUsage: §f/" + label + getPath(sender);
+        return label + " " + getPath(sender);
     }
 
     public String getSuccessMessage(CommandSender sender, String label, Arguments args) {
@@ -124,6 +149,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
     public final SMPCommand registerSubCommands(SMPCommand... commands) {
         this.subCommands.addAll(List.of(commands));
+        this.subCommands.forEach(command -> command.parent = this);
         return this;
     }
 

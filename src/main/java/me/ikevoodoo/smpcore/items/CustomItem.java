@@ -1,6 +1,7 @@
 package me.ikevoodoo.smpcore.items;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.functions.SerializableConsumer;
 import me.ikevoodoo.smpcore.recipes.RecipeOptions;
 import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
@@ -40,7 +41,7 @@ public abstract class CustomItem {
     private Pair<NamespacedKey, Recipe> recipe;
     private final String id;
 
-    private Consumer<Player> unlockOnJoin;
+    private SerializableConsumer<Player> unlockOnJoin;
     private Consumer<Player> unlockOnObtain;
 
     private Supplier<RecipeOptions> optionsSupplier = () -> new RecipeOptions(Material.STONE, 1, true);
@@ -130,6 +131,14 @@ public abstract class CustomItem {
             player.discoverRecipe(key);
         });
         return this;
+    }
+
+    public final boolean containsAtLeast(Player player, int amount) {
+        return player.getInventory().containsAtLeast(getItemStack(), amount);
+    }
+
+    public final void remove(Player player, int amount) {
+        player.getInventory().removeItem(getItemStack(amount));
     }
 
     public final CustomItem addKey(String key) {

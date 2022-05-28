@@ -1,35 +1,34 @@
 package me.ikevoodoo.smpcore.handlers;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.functions.SerializableConsumer;
 import me.ikevoodoo.smpcore.shared.PluginProvider;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.*;
 
 public class JoinActionHandler extends PluginProvider {
 
-    private final HashMap<UUID, List<Consumer<UUID>>> joinActions = new HashMap<>();
-    private final List<Consumer<Player>> joinListeners = new ArrayList<>();
+    private final HashMap<UUID, List<SerializableConsumer<UUID>>> joinActions = new HashMap<>();
+    private final List<SerializableConsumer<Player>> joinListeners = new ArrayList<>();
 
     public JoinActionHandler(SMPPlugin plugin) {
         super(plugin);
+        /*this.joinActions.putAll(joinActions);
+        this.joinListeners.addAll(joinListeners);*/
     }
 
-    public void runOnJoin(UUID id, Consumer<UUID> runnable) {
+    public void runOnJoin(UUID id, SerializableConsumer<UUID> runnable) {
         if (joinActions.containsKey(id)) joinActions.get(id).add(runnable);
         else joinActions.put(id, new ArrayList<>(List.of(runnable)));
     }
 
-    public Consumer<Player> runAlwaysOnJoin(Consumer<Player> runnable) {
+    public SerializableConsumer<Player> runAlwaysOnJoin(SerializableConsumer<Player> runnable) {
         joinListeners.add(runnable);
         return runnable;
     }
 
-    public void cancelAlwaysOnJoin(Consumer<Player> runnable) {
+    public void cancelAlwaysOnJoin(SerializableConsumer<Player> runnable) {
         joinListeners.remove(runnable);
     }
 
@@ -40,5 +39,13 @@ public class JoinActionHandler extends PluginProvider {
 
     public void fire(Player player) {
         joinListeners.forEach(consumer -> consumer.accept(player));
+    }
+
+    public HashMap<UUID, List<SerializableConsumer<UUID>>> getJoinActions() {
+        return joinActions;
+    }
+
+    public List<SerializableConsumer<Player>> getJoinListeners() {
+        return joinListeners;
     }
 }

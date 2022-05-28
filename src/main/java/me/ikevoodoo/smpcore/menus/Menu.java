@@ -1,32 +1,42 @@
 package me.ikevoodoo.smpcore.menus;
 
+import me.ikevoodoo.smpcore.SMPPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Menu {
 
     private final List<Menu> children;
     private Menu parent;
-    private String id;
 
-    private final List<MenuHandler> handlers;
+    private final String id;
 
-    private Inventory inv;
+    private final List<MenuWatcher> watchers;
 
+    private ItemStack[] items;
+    private int size;
     private String title;
+    private boolean movingBlocked;
 
-    public Menu(String id) {
+    private final List<Player> viewers = new ArrayList<>();
+
+    public Menu(SMPPlugin plugin, String id) {
         this.id = id;
         this.parent = null;
         this.children = new ArrayList<>();
-        this.handlers = new ArrayList<>();
+        this.watchers = new ArrayList<>();
 
-        this.inv = Bukkit.createInventory(null, 54, this.title = "Menu: " + id);
+        this.title = "Menu: " + id;
+        this.size = 54;
+        this.items = new ItemStack[this.size];
+        plugin.getMenuHandler().registerMenu(this);
     }
 
     public void setParent(Menu parent) {
@@ -48,7 +58,13 @@ public class Menu {
     }
 
     public void show(Player player) {
-
+        Inventory inv = Bukkit.createInventory(null, this.size, this.title);
+        for (int i = 0; i < this.size; i++) {
+            if(items[i] != null) inv.setItem(i, items[i].clone());
+            else inv.setItem(i, null);
+        }
+        this.viewers.add(player);
+        player.openInventory(inv);
     }
 
     public void close(Player player) {
@@ -63,20 +79,68 @@ public class Menu {
         }
     }
 
+    public void set(int slot, ItemStack item) {
+        this.items[slot] = item;
+    }
+
     public void setTitle(String title) {
-        List<HumanEntity> viewers = new ArrayList<>(this.inv.getViewers());
-        this.inv = Bukkit.createInventory(null, this.inv.getSize(), this.title = title);
-        viewers.forEach(humanEntity -> humanEntity.openInventory(this.inv));
+        this.title = title;
     }
 
     public void setSize(int size) {
-        List<HumanEntity> viewers = new ArrayList<>(this.inv.getViewers());
-        this.inv = Bukkit.createInventory(null, size, this.title);
-        viewers.forEach(humanEntity -> humanEntity.openInventory(this.inv));
+        this.size = size;
+        ItemStack[] newItems = new ItemStack[size];
+        System.arraycopy(this.items, 0, newItems, 0, Math.min(this.items.length, size));
+        this.items = newItems;
     }
 
-    public void addHandler(MenuHandler handler) {
-        this.handlers.add(handler);
+    public void addWatcher(MenuWatcher watcher) {
+        this.watchers.add(watcher);
+    }
+
+    public void listen(int slot, Predicate<MenuEvent> runnable) {
+        this.watchers.add(new MenuWatcher() {
+            @Override
+            public boolean onMenuClick(Menu menu, MenuEvent item) {
+                if(item.getSlot() == slot)
+                    return runnable.test(item);
+                return false;
+            }
+        });
+    }
+
+    public boolean isViewer(Player player) {
+        return this.viewers.contains(player);
+    }
+
+    public void onOpen(Player player) {
+        for (MenuWatcher watcher : this.watchers) {
+            watcher.onMenuOpen(this, player);
+        }
+    }
+
+    public void onClose(Player player) {
+        this.viewers.remove(player);
+        for (MenuWatcher watcher : this.watchers) {
+            watcher.onMenuClose(this, player);
+        }
+    }
+
+    public void blockItems() {
+        this.movingBlocked = true;
+    }
+
+    public void unblockItems() {
+        this.movingBlocked = false;
+    }
+
+    public boolean itemUpdated(int slot, ItemStack item, Player player) {
+        MenuEvent menuItem = new MenuEvent(slot, item, player);
+        var ref = new Object() {
+            boolean cancelled = false;
+        };
+        this.watchers.forEach(watcher -> ref.cancelled = watcher.onMenuClick(this, menuItem) || this.movingBlocked || ref.cancelled);
+        return ref.cancelled;
     }
 
 }

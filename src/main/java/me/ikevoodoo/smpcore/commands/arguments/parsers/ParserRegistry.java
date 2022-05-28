@@ -1,5 +1,6 @@
 package me.ikevoodoo.smpcore.commands.arguments.parsers;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -12,12 +13,16 @@ public class ParserRegistry {
     static {
         register(new UUIDParser(), UUID.class);
         register(new PlayerParser(), Player.class);
+        register(new OfflinePlayerParser(), OfflinePlayer.class);
         register(new IntParser(), int.class, Integer.class);
         register(new DoubleParser(), double.class, Double.class);
         register(new FloatParser(), float.class, Float.class);
         register(new LongParser(), long.class, Long.class);
         register(new BooleanParser(), boolean.class, Boolean.class);
         register(new StringParser(), String.class);
+    }
+
+    private ParserRegistry() {
     }
 
     public static void register(BaseParser<?> parser, Class<?>... classes) {

@@ -9,10 +9,8 @@ import me.ikevoodoo.smpcore.config.ConfigData;
 import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
 import me.ikevoodoo.smpcore.config.annotations.Config;
-import me.ikevoodoo.smpcore.handlers.EliminationHandler;
-import me.ikevoodoo.smpcore.handlers.InventoryActionHandler;
-import me.ikevoodoo.smpcore.handlers.JoinActionHandler;
-import me.ikevoodoo.smpcore.handlers.ResourcePackHandler;
+import me.ikevoodoo.smpcore.functions.SerializableConsumer;
+import me.ikevoodoo.smpcore.handlers.*;
 import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.listeners.*;
@@ -26,11 +24,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -51,6 +49,7 @@ public abstract class SMPPlugin extends JavaPlugin {
     private InventoryActionHandler inventoryActionHandler;
     private ResourcePackHandler resourcePackHandler;
     private ChatInputHandler chatInputHandler;
+    private MenuHandler menuHandler;
 
     private RecipeLoader recipeLoader;
     private PlayerUseListener playerUseListener;
@@ -68,12 +67,20 @@ public abstract class SMPPlugin extends JavaPlugin {
     private final HashMap<String, CustomItem> customItems = new HashMap<>();
 
     @Override
+    public final void onLoad() {
+        onPreload();
+    }
+
+    @Override
     public final void onEnable() {
+        //createDataFolder();
+        //loadJoinHandler();
         eliminationHandler = new EliminationHandler(this);
         joinActionHandler = new JoinActionHandler(this);
         inventoryActionHandler = new InventoryActionHandler(this);
         resourcePackHandler = new ResourcePackHandler(this);
         chatInputHandler = new ChatInputHandler(this);
+        menuHandler = new MenuHandler();
 
         recipeLoader = new RecipeLoader(this);
         playerUseListener = new PlayerUseListener(this);
@@ -85,9 +92,10 @@ public abstract class SMPPlugin extends JavaPlugin {
                 new PlayerDamageListener(),
                 new PlayerSleepListener(),
                 new InventoryEditListener(this),
-                new ChatMessageListener(this)
+                new ChatMessageListener(this),
+                new MenuUpdateListener(this)
         );
-        configHandler = new ConfigHandler();
+        configHandler = new ConfigHandler(this);
         try {
             registerDynamically();
         } catch (IOException | URISyntaxException e) {
@@ -100,8 +108,15 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     @Override
     public final void onDisable() {
-        // Run pre disable code
+        //saveJoinHandler();
         whenDisabled();
+    }
+
+    /**
+     * No util will work at this stage
+     * */
+    public void onPreload() {
+
     }
 
     public void whenEnabled() {
@@ -115,6 +130,8 @@ public abstract class SMPPlugin extends JavaPlugin {
     public final void reload() {
         reloadConfig();
         configHandler.reload();
+        for(CustomItem customItem : customItems.values())
+            customItem.reload();
     }
 
     public final EliminationHandler getEliminationHandler() {
@@ -135,6 +152,10 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     public final ChatInputHandler getChatInputHandler() {
         return chatInputHandler;
+    }
+
+    public final MenuHandler getMenuHandler() {
+        return menuHandler;
     }
 
     public final RecipeLoader getRecipeLoader() {
@@ -471,5 +492,55 @@ public abstract class SMPPlugin extends JavaPlugin {
         }
         return classes.stream().filter(clazz -> clazz.isAssignableFrom(Listener.class)).toList();
     }
+
+    // Needed for later
+/*
+    private void createDataFolder() {
+        File data = new File(getDataFolder(), "data");
+        if (!data.exists()) {
+            data.mkdirs();
+        }
+    }
+
+    private void loadJoinHandler() {
+        File joinActions = new File(getDataFolder(), "data" + File.separator + "join-actions.internal");
+        HashMap<UUID, List<SerializableConsumer<UUID>>> joinActionsMap = new HashMap<>();
+        if (joinActions.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(joinActions))) {
+                joinActionsMap = (HashMap<UUID, List<SerializableConsumer<UUID>>>) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        File joinActionHandlers = new File(getDataFolder(), "data" + File.separator + "join-action-handlers.internal");
+        List<SerializableConsumer<Player>> joinListeners = new ArrayList<>();
+        if (joinActionHandlers.exists()) {
+            try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(joinActionHandlers))) {
+                joinListeners = (List<SerializableConsumer<Player>>) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        joinActionHandler = new JoinActionHandler(this, joinActionsMap, joinListeners);
+    }
+
+    private void saveJoinHandler() {
+        File joinActions = new File(getDataFolder(), "data" + File.separator + "join-actions.internal");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(joinActions))) {
+            oos.writeObject(joinActionHandler.getJoinActions());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        File joinActionList = new File(getDataFolder(), "data" + File.separator + "join-action-handlers.internal");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(joinActionList))) {
+            oos.writeObject(joinActionHandler.getJoinListeners());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/
 
 }

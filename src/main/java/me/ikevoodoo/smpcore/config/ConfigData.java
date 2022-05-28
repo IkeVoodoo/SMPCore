@@ -158,6 +158,8 @@ public class ConfigData {
     }
 
     private void load(Class<?> clazz, ConfigurationSection section) {
+        if(section == null)
+            return;
         for(Field field : clazz.getFields()) {
             try {
                 if(field.getType().isAnnotationPresent(Config.class)) {
@@ -168,9 +170,9 @@ public class ConfigData {
                 if(section.isConfigurationSection(field.getName())) {
                     if(List.class.isAssignableFrom(field.getType())) {
                         ConfigurationSection listSection = section.getConfigurationSection(field.getName());
-                        String type = listSection.getString("doNotTouch");
+                        String storedType = listSection.getString("doNotTouch");
                         ClassLoader loader = getClass().getClassLoader();
-                        Class<?> elementType = loader.loadClass(type);
+                        Class<?> elementType = loader.loadClass(storedType);
                         List<Object> list = new ArrayList<>();
                         for(String key : listSection.getKeys(false)) {
                             ConfigurationSection sec = listSection.getConfigurationSection(key);
@@ -206,7 +208,9 @@ public class ConfigData {
                 }
 
                 field.set(null, val);
-            } catch (IllegalAccessException | ClassNotFoundException ignored) {}
+            } catch (IllegalAccessException | ClassNotFoundException ignored) {
+                // Unused
+            }
         }
         for(Class<?> nested : clazz.getDeclaredClasses()) {
             load(nested, section.getConfigurationSection(nested.getSimpleName().toLowerCase(Locale.ROOT)));
