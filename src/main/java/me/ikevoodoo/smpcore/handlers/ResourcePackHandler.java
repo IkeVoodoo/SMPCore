@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -26,17 +27,17 @@ public class ResourcePackHandler extends PluginProvider {
     }
 
     public void addResourcePack(String id, String location) throws IOException, NoSuchAlgorithmException {
-        File file = new File(location);
+        /*File file = new File(location);
         if(file.exists()) {
             addResourcePack(id, file);
             return;
-        }
+        }*/
         byte[] hash = URLUtils.ifValid(location, conn -> HashUtils.sha1Hash(conn.getInputStream()));
         if (hash == null) return;
         resourcePacks.put(id, new ResourcePackData(location, hash));
     }
 
-    public void addResourcePack(String id, File location) throws IOException, NoSuchAlgorithmException {
+    /*public void addResourcePack(String id, File location) throws IOException, NoSuchAlgorithmException {
         if(location.exists()) {
             if(location.isDirectory()) {
                 File zip = new File(location.getParentFile(), "pack.zip");
@@ -59,7 +60,7 @@ public class ResourcePackHandler extends PluginProvider {
         }
 
         throw new IOException("File does not exist");
-    }
+    }*/
 
     public void applyResourcePack(Player player, String id) {
         ResourcePackData data = resourcePacks.get(id);
@@ -78,6 +79,16 @@ public class ResourcePackHandler extends PluginProvider {
 
     public void removeResourcePack(String id) {
         resourcePacks.remove(id);
+    }
+
+    public void reload() throws IOException, NoSuchAlgorithmException {
+        HashMap<String, ResourcePackData> newResourcePacks = new HashMap<>(resourcePacks);
+        //HashMap<String, ResourcePackData> newResourcePackFiles = new HashMap<>(resourcePackFiles);
+        resourcePacks.clear();
+        //resourcePackFiles.clear();
+        for (Map.Entry<String, ResourcePackData> entry : newResourcePacks.entrySet()) {
+            addResourcePack(entry.getKey(), entry.getValue().location());
+        }
     }
 
     private void addToZip(File folder, ZipOutputStream os) {

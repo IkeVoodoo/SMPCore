@@ -78,8 +78,7 @@ public abstract class CustomItem {
 
         List<String> lore = data.lore.get();
         if(lore != null && !lore.isEmpty()) {
-            for (int i = 0; i < lore.size(); i++)
-                lore.set(i, ChatColor.translateAlternateColorCodes('&', lore.get(i)));
+            lore.replaceAll(textToTranslate -> ChatColor.translateAlternateColorCodes('&', textToTranslate));
             itemMeta.setLore(lore);
         }
 

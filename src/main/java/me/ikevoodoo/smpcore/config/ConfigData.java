@@ -152,7 +152,7 @@ public class ConfigData {
                 ignored.printStackTrace();
             }
         }
-        for(Class<?> nested : clazz.getClasses()) {
+        for(Class<?> nested : clazz.getDeclaredClasses()) {
             set(nested, o, section.createSection(nested.getSimpleName().toLowerCase(Locale.ROOT)));
         }
     }

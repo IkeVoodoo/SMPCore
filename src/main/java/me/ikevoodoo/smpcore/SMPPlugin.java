@@ -127,11 +127,16 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     }
 
+    public void onReload() {
+
+    }
+
     public final void reload() {
         reloadConfig();
         configHandler.reload();
         for(CustomItem customItem : customItems.values())
             customItem.reload();
+        this.onReload();
     }
 
     public final EliminationHandler getEliminationHandler() {
@@ -282,12 +287,15 @@ public abstract class SMPPlugin extends JavaPlugin {
     public final void set(String path, Object value) {
         getConfig().set(path, value);
     }
-
     public final <T extends CustomItem> Optional<T> getItem(String id) {
         CustomItem item = customItems.get(id);
         if(item == null)
             return Optional.empty();
         return Optional.of((T) item);
+    }
+
+    public final NamespacedKey makeKey(String id) {
+        return new NamespacedKey(this, id);
     }
 
     public static SMPPlugin getById(String id) {
