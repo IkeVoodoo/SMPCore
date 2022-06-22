@@ -2,7 +2,7 @@ package me.ikevoodoo.smpcore.items;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.functions.SerializableConsumer;
-import me.ikevoodoo.smpcore.messaging.Message;
+import me.ikevoodoo.smpcore.text.messaging.Message;
 import me.ikevoodoo.smpcore.recipes.RecipeData;
 import me.ikevoodoo.smpcore.recipes.RecipeOptions;
 import me.ikevoodoo.smpcore.utils.Pair;

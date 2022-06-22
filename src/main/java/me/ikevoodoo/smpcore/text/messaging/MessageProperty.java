@@ -1,4 +1,4 @@
-package me.ikevoodoo.smpcore.messaging;
+package me.ikevoodoo.smpcore.text.messaging;
 
 public enum MessageProperty {
 

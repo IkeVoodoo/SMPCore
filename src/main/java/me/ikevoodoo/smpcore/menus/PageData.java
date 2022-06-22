@@ -1,6 +1,6 @@
 package me.ikevoodoo.smpcore.menus;
 
-import me.ikevoodoo.smpcore.messaging.Message;
+import me.ikevoodoo.smpcore.text.messaging.Message;
 
 public class PageData {
 

@@ -1,4 +1,4 @@
-package me.ikevoodoo.smpcore.messaging;
+package me.ikevoodoo.smpcore.text.messaging;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -71,6 +71,11 @@ public class MessageBuilder {
 
     public MessageBuilder link(String url, String text, ChatColor color) {
         return add(text, color).link(url);
+    }
+
+    public MessageBuilder clear() {
+        this.messageComponents.clear();
+        return this;
     }
 
     public Message build() {

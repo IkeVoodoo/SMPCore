@@ -1,4 +1,4 @@
-package me.ikevoodoo.smpcore.messaging;
+package me.ikevoodoo.smpcore.text.messaging;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
