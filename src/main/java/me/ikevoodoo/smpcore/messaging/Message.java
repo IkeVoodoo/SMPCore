@@ -1,21 +1,29 @@
 package me.ikevoodoo.smpcore.messaging;
 
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public class Message {
 
-    private final BaseComponent msg;
+    private final TextComponent msg;
 
     protected Message(BaseComponent[] components) {
         // merge components
-        BaseComponent comp = components[0];
-        for (int i = 1; i < components.length; i++)
-            comp.addExtra(components[i]);
+        TextComponent comp = new TextComponent();
+        for (BaseComponent component : components) comp.addExtra(component);
 
         this.msg = comp;
+    }
+
+    public TextComponent component() {
+        return this.msg.duplicate();
+    }
+
+    public String text() {
+        return this.msg.toLegacyText();
     }
 
     public Message send(Player player) {

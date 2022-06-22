@@ -25,6 +25,10 @@ public class ConfigHandler {
         return configs.get(name);
     }
 
+    public boolean exists(String name) {
+        return this.configs.containsKey(name) && new File(plugin.getDataFolder(), name).exists();
+    }
+
     public FileConfiguration getYmlConfig(String name) {
         ConfigData config = getConfig(name);
         if (config == null) {

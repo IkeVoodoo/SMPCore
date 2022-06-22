@@ -2,6 +2,8 @@ package me.ikevoodoo.smpcore.items;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.functions.SerializableConsumer;
+import me.ikevoodoo.smpcore.messaging.Message;
+import me.ikevoodoo.smpcore.recipes.RecipeData;
 import me.ikevoodoo.smpcore.recipes.RecipeOptions;
 import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
@@ -39,7 +41,9 @@ public abstract class CustomItem {
 
     private final CustomItemData data = new CustomItemData();
     private Pair<NamespacedKey, Recipe> recipe;
+    private RecipeData recipeData;
     private final String id;
+    private final Message friendlyName;
 
     private SerializableConsumer<Player> unlockOnJoin;
     private Consumer<Player> unlockOnObtain;
@@ -48,13 +52,18 @@ public abstract class CustomItem {
 
     private final SMPPlugin plugin;
 
-    protected CustomItem(SMPPlugin plugin, String id) {
+    protected CustomItem(SMPPlugin plugin, String id, Message friendlyName) {
         this.plugin = plugin;
         this.id = id;
+        this.friendlyName = friendlyName;
     }
 
-    public String getId() {
+    public final String getId() {
         return id;
+    }
+
+    public final Message getFriendlyName() {
+        return this.friendlyName;
     }
 
     public static void give(Player player, CustomItem customItem) {
@@ -104,6 +113,10 @@ public abstract class CustomItem {
         return optionsSupplier.get();
     }
 
+    public final RecipeData getRecipeData() {
+        return this.recipeData;
+    }
+
     public final CustomItem unlockOnJoin() {
         clearConsumers();
         unlockOnJoin = this.plugin.getJoinActionHandler().runAlwaysOnJoin(player -> {
@@ -144,7 +157,7 @@ public abstract class CustomItem {
         NamespacedKey namespacedKey = new NamespacedKey(this.plugin, key);
         keys.add(namespacedKey);
         this.plugin.onUse(key, (plr, item, action) -> {
-            ItemClickResult result = onClick(plr, item, action);
+            ItemClickResult result = tryClick(plr, item, action);
             if(result == null)
                 return true;
 
@@ -163,7 +176,15 @@ public abstract class CustomItem {
 
     public abstract ItemStack createItem(Player player);
 
-    public ItemClickResult onClick(Player player, ItemStack itemStack, Action action) {
+    public final ItemClickResult tryClick(Player player, ItemStack itemStack, Action action) {
+        try {
+            return this.onClick(player, itemStack, action);
+        } catch (Exception e) {
+            return new ItemClickResult(ItemClickState.FAIL, true);
+        }
+    }
+
+    protected ItemClickResult onClick(Player player, ItemStack itemStack, Action action) {
         return new ItemClickResult(ItemClickState.SUCCESS, true);
     }
 
@@ -175,8 +196,13 @@ public abstract class CustomItem {
         return null;
     }
 
+    public RecipeData createRecipeData() {
+        return null;
+    }
+
     public final void reload() {
         NamespacedKey old = recipe != null ? recipe.getFirst() : null;
+        this.recipeData = createRecipeData();
         Pair<NamespacedKey, Recipe> newRecipe = createRecipe();
         if(old != null && Bukkit.getRecipe(old) != null)
             Bukkit.removeRecipe(old);
@@ -217,8 +243,8 @@ public abstract class CustomItem {
                 .setCustomModelData(() -> getConfig().getInt(path + ".customModelData", -1));
     }
 
-    public final CustomItem bindConfigOptions(ConfigurationSection section) {
-        optionsSupplier = () -> this.plugin.getRecipeLoader().getOptions(section);
+    public final CustomItem bindConfigOptions(String config, String path) {
+        optionsSupplier = () -> this.plugin.getRecipeLoader().getOptions(this.plugin.getConfigHandler().getYmlConfig(config).getConfigurationSection(path));
         return this;
     }
 

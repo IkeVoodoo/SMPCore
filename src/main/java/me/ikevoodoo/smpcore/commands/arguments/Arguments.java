@@ -1,5 +1,6 @@
 package me.ikevoodoo.smpcore.commands.arguments;
 
+import me.ikevoodoo.smpcore.commands.arguments.parsers.BaseParser;
 import me.ikevoodoo.smpcore.commands.arguments.parsers.ParserRegistry;
 import org.bukkit.command.CommandSender;
 
@@ -79,17 +80,33 @@ public class Arguments implements Iterable<Integer> {
     }
 
     public boolean is(int index, Class<?> type) {
+        if (index >= args.size()) return false;
         return ParserRegistry.get(type) != null && ParserRegistry.get(type).canParse(args.get(index));
     }
 
     public <T> T get(int index, Class<T> type) {
+        if (index >= args.size()) return null;
+        String data = args.get(index);
         if(type == String.class)
-            return type.cast(args.get(index));
-        return ParserRegistry.get(type).parse(sender, args.get(index));
+            return type.cast(data);
+        BaseParser<T> parser = ParserRegistry.get(type);
+        if (parser == null || !parser.canParse(data))
+            return null;
+        return parser.parse(sender, data);
     }
 
     public <T> T get(String name, Class<T> type) {
         return get(find(name), type);
+    }
+
+    public <T> T get(int index, Class<T> type, T def) {
+        T v = get(index, type);
+        if (v == null) return def;
+        return v;
+    }
+
+    public <T> T get(String name, Class<T> type, T def) {
+        return get(find(name), type, def);
     }
 
     public <T> List<T> getAll(Class<T> type) {
@@ -108,7 +125,11 @@ public class Arguments implements Iterable<Integer> {
     }
 
     public String get(int index) {
-        return get(index, String.class);
+        return index > this.args.size() ? null : this.args.get(index);
+    }
+
+    public String get(int index, String def) {
+        return index >= this.args.size() || index < 0 ? def : this.args.get(index);
     }
 
     /**

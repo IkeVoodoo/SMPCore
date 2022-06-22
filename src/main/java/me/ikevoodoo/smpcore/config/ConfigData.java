@@ -2,6 +2,7 @@ package me.ikevoodoo.smpcore.config;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.config.annotations.*;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -39,9 +40,13 @@ public class ConfigData {
             e.printStackTrace();
         }
         if(!this.file.exists()) {
-            this.file.getParentFile().mkdirs();
+            if (!this.file.getParentFile().mkdirs()) {
+                throw new IllegalStateException("Unable to create file parent folder: " + this.file.getParentFile().getAbsolutePath());
+            }
             try {
-                this.file.createNewFile();
+                if(!this.file.createNewFile()) {
+                    throw new IllegalStateException("Unable to create file: " + this.file.getAbsolutePath());
+                }
                 loadConfig();
                 set(clazz, null, config);
                 save();
@@ -123,7 +128,7 @@ public class ConfigData {
                         Class<?> listType = list.get(0).getClass();
                         if(!listType.isAnnotationPresent(ConfigType.class)) {
                             section.set(field.getName(), list);
-                            return;
+                            continue;
                         }
                         String elementName = listType.getSimpleName().toLowerCase(Locale.ROOT);
                         ConfigurationSection elementSection = section.createSection(field.getName());
@@ -148,8 +153,8 @@ public class ConfigData {
                 }
 
                 section.set(field.getName(), value);
-            } catch (IllegalAccessException ignored) {
-                ignored.printStackTrace();
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
             }
         }
         for(Class<?> nested : clazz.getDeclaredClasses()) {
@@ -170,6 +175,7 @@ public class ConfigData {
                 if(section.isConfigurationSection(field.getName())) {
                     if(List.class.isAssignableFrom(field.getType())) {
                         ConfigurationSection listSection = section.getConfigurationSection(field.getName());
+                        if (listSection == null) continue;
                         String storedType = listSection.getString("doNotTouch");
                         ClassLoader loader = getClass().getClassLoader();
                         Class<?> elementType = loader.loadClass(storedType);
@@ -193,7 +199,7 @@ public class ConfigData {
                     continue;
                 }
 
-                Object val = config.get(field.getName(), defaults.get(field.getName()));
+                Object val = section.get(field.getName(), defaults.get(field.getName()));
                 if(val == null)
                     continue;
 
@@ -207,6 +213,10 @@ public class ConfigData {
                     continue;
                 }
 
+                if(val instanceof String str) {
+                    field.set(null, ChatColor.translateAlternateColorCodes('&', str));
+                    continue;
+                }
                 field.set(null, val);
             } catch (IllegalAccessException | ClassNotFoundException ignored) {
                 // Unused

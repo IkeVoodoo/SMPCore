@@ -64,7 +64,9 @@ public class RecipeLoader {
             return materials;
         }
 
-        for(String key : config.getConfigurationSection(path).getKeys(false)) {
+        ConfigurationSection section = config.getConfigurationSection(path);
+        if (section == null) return materials;
+        for(String key : section.getKeys(false)) {
             Material mat = Material.AIR;
             String matName = config.getString(path + "." + key + ".item");
             if(matName == null)
@@ -111,6 +113,7 @@ public class RecipeLoader {
     }
 
     public RecipeOptions getOptions(ConfigurationSection config) {
+        if(config == null) return null;
         return new RecipeOptions(
                 fromString(config.getString("type")),
                 config.getInt("outputAmount"),

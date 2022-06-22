@@ -9,7 +9,6 @@ import me.ikevoodoo.smpcore.config.ConfigData;
 import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
 import me.ikevoodoo.smpcore.config.annotations.Config;
-import me.ikevoodoo.smpcore.functions.SerializableConsumer;
 import me.ikevoodoo.smpcore.handlers.*;
 import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
@@ -24,16 +23,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
@@ -132,11 +132,15 @@ public abstract class SMPPlugin extends JavaPlugin {
     }
 
     public final void reload() {
+        this.reload(false);
+    }
+
+    public final void reload(boolean skipEvent) {
         reloadConfig();
         configHandler.reload();
         for(CustomItem customItem : customItems.values())
             customItem.reload();
-        this.onReload();
+        if(!skipEvent) this.onReload();
     }
 
     public final EliminationHandler getEliminationHandler() {
@@ -225,12 +229,14 @@ public abstract class SMPPlugin extends JavaPlugin {
         PluginCommand command = getCommand(name);
         assert command != null;
         command.setExecutor(executor);
+        command.setTabCompleter(executor);
     }
 
     public final void addCommand(SMPCommand command) {
         var cmd = getCommand(command.getName());
         if(cmd != null) {
             cmd.setExecutor(command);
+            cmd.setTabCompleter(command);
             return;
         }
 
@@ -287,11 +293,15 @@ public abstract class SMPPlugin extends JavaPlugin {
     public final void set(String path, Object value) {
         getConfig().set(path, value);
     }
-    public final <T extends CustomItem> Optional<T> getItem(String id) {
+    public final Optional<CustomItem> getItem(String id) {
         CustomItem item = customItems.get(id);
         if(item == null)
             return Optional.empty();
-        return Optional.of((T) item);
+        return Optional.of(item);
+    }
+
+    public final List<CustomItem> getItems() {
+        return new ArrayList<>(this.customItems.values());
     }
 
     public final NamespacedKey makeKey(String id) {
@@ -304,15 +314,14 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     private void registerDynamically() throws IOException, URISyntaxException {
         List<Class<?>> classes = getAllClasses(getClass().getPackage().getName());
-        Pair<List<Listener>, List<SMPCommand>> toRegister = checkPackageForClasses(classes, Listener.class, SMPCommand.class);
-        registerListeners(toRegister.getFirst());
-        addCommands(toRegister.getSecond());
-
         findConfigClasses(classes).forEach(clazz -> {
             Config config = clazz.getAnnotation(Config.class);
             ConfigData data = new ConfigData(this, config.value(), config.type(), clazz);
             getConfigHandler().registerConfig(data);
         });
+        Pair<List<Listener>, List<SMPCommand>> toRegister = checkPackageForClasses(classes, Listener.class, SMPCommand.class);
+        registerListeners(toRegister.getFirst());
+        addCommands(toRegister.getSecond());
 
         findItemClasses(classes).forEach(clazz -> {
             CustomItem item = getClassInstance(clazz.asSubclass(CustomItem.class));
@@ -354,7 +363,9 @@ public abstract class SMPPlugin extends JavaPlugin {
 
     private List<Class<?>> getAllClasses(String packageName) throws URISyntaxException, IOException {
         String packagePath = packageName.replace('.', '/');
-        URI pkg = getClass().getClassLoader().getResource(packagePath).toURI();
+        URL resource = getClass().getClassLoader().getResource(packagePath);
+        if (resource == null) return List.of();
+        URI pkg = resource.toURI();
         List<Class<?>> classes = new ArrayList<>();
 
         Path root;

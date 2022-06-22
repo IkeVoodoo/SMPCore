@@ -5,17 +5,16 @@ import me.ikevoodoo.smpcore.commands.arguments.Argument;
 import me.ikevoodoo.smpcore.commands.arguments.Arguments;
 import me.ikevoodoo.smpcore.commands.arguments.OptionalFor;
 import me.ikevoodoo.smpcore.shared.PluginProvider;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-public abstract class SMPCommand extends PluginProvider implements CommandExecutor {
+public abstract class SMPCommand extends PluginProvider implements CommandExecutor, TabCompleter {
 
-    private final List<SMPCommand> subCommands;
+    private final HashMap<String, SMPCommand> subCommands;
     private SMPCommand parent;
     private final String name;
     private final HashMap<UUID, Long> cooldowns;
@@ -28,7 +27,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         super(plugin);
         this.name = name;
         this.permission = permission;
-        this.subCommands = new ArrayList<>();
+        this.subCommands = new HashMap<>();
         this.cooldowns = new HashMap<>();
     }
 
@@ -45,12 +44,11 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
         Arguments arguments = new Arguments(sender, args);
         if (!arguments.match(this.args)) {
-            // get the sub command
             if(args.length > 0) {
-                SMPCommand subCommand = getSubCommand(args[0]);
+                SMPCommand subCommand = this.subCommands.get(args[0]);
                 if(subCommand != null) {
                     String msg = subCommand.getInvalidArgsMessage(sender, subCommand.name, arguments);
-                    if(this.parent == null) {
+                    if(this.parent != null) {
                         sender.sendMessage(getInvalidArgsPrefix(sender, subCommand.name, arguments) + msg);
                         return true;
                     }
@@ -89,7 +87,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
             return this.execute(sender, arguments);
         }
 
-        SMPCommand subCommand = getSubCommand(args[0]);
+        SMPCommand subCommand = this.subCommands.get(args[0]);
         if (subCommand != null) {
             return subCommand.onCommand(sender, command, label, List.of(args).subList(1, args.length).toArray(new String[0]));
         }
@@ -103,13 +101,49 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         return res;
     }
 
-    private final SMPCommand getSubCommand(String name) {
-        for (SMPCommand subCommand : this.subCommands) {
-            if (subCommand.getName().equalsIgnoreCase(name)) {
-                return subCommand;
+    @Override
+    public final List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        List<String> out = new ArrayList<>();
+        if(strings.length > 0) {
+            SMPCommand cmd = this.subCommands.get(strings[0]);
+            if (cmd != null) {
+                String[] subArgs = new String[strings.length - 1];
+                System.arraycopy(strings, 1, subArgs, 0, subArgs.length);
+                out.addAll(cmd.onTabComplete(commandSender, command, s, subArgs));
+                return out;
             }
         }
-        return null;
+        this.subCommands.forEach((key, sub) -> out.add(key));
+
+        List<Argument> sub;
+        if (strings.length - 1 > this.args.size()) sub = new ArrayList<>();
+        else sub = this.args.subList(Math.max(0, strings.length - 1), this.args.size());
+
+        for (Argument arg : sub) {
+            out.addAll(getCompatible(commandSender, arg));
+            if (arg.required()) break;
+        }
+
+        return out;
+    }
+
+    private List<String> getCompatible(CommandSender sender, Argument arg) {
+        List<String> compatible = new ArrayList<>();
+
+        if (arg.type() == Player.class) {
+            Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getDisplayName()));
+            return compatible;
+        }
+
+        if (arg.type() == OfflinePlayer.class) {
+            Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getDisplayName()));
+            Arrays.stream(Bukkit.getOfflinePlayers()).forEach(plr -> compatible.add(plr.getName()));
+            return compatible;
+        }
+
+        String[] border = getArgumentBorder(sender, arg);
+        compatible.add(border[0].trim() + arg.name() + border[1]);
+        return compatible;
     }
 
     public abstract boolean execute(CommandSender sender, Arguments args);
@@ -128,7 +162,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
     }
 
     public String getInvalidArgsMessage(CommandSender sender, String label, Arguments args) {
-        return label + " " + getPath(sender);
+        return "Not yet implemented, sorry!";
     }
 
     public String getSuccessMessage(CommandSender sender, String label, Arguments args) {
@@ -143,13 +177,15 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         return "§cYou must wait &4" + (getCooldown(plr) / 1000) + " &cseconds before using this command again.";
     }
 
-    public void setArgs(Argument... args) {
+    public final void setArgs(Argument... args) {
         this.args = List.of(args);
     }
 
     public final SMPCommand registerSubCommands(SMPCommand... commands) {
-        this.subCommands.addAll(List.of(commands));
-        this.subCommands.forEach(command -> command.parent = this);
+        for (SMPCommand sub : commands) {
+            this.subCommands.put(sub.getName(), sub);
+            sub.parent = this;
+        }
         return this;
     }
 
@@ -227,7 +263,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         return this.permission;
     }
 
-    public void setPermission(String permission) {
+    public final void setPermission(String permission) {
         this.permission = permission;
     }
 
