@@ -3,7 +3,6 @@ package me.ikevoodoo.smpcore.utils;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 
 public class HealthUtils {
 
@@ -48,11 +47,16 @@ public class HealthUtils {
         return setIfWithin(get(entity) - amount, min, 2048, entity);
     }
 
-    public static void heal(Player player, double amount) {
-        double max = get(player);
-        double health = player.getHealth() + amount;
+    public static void heal(LivingEntity entity, double amount) {
+        double max = get(entity);
+        double health = entity.getHealth() + amount;
         if(health > max) health = max;
-        player.setHealth(health);
+        if (health < 0) health = 0;
+        entity.setHealth(health);
+    }
+
+    public static void damage(LivingEntity entity, double amount) {
+        heal(entity, -amount);
     }
 
 }

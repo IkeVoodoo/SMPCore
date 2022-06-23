@@ -131,12 +131,12 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         List<String> compatible = new ArrayList<>();
 
         if (arg.type() == Player.class) {
-            Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getDisplayName()));
+            Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getName()));
             return compatible;
         }
 
         if (arg.type() == OfflinePlayer.class) {
-            Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getDisplayName()));
+            Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getName()));
             Arrays.stream(Bukkit.getOfflinePlayers()).forEach(plr -> compatible.add(plr.getName()));
             return compatible;
         }
