@@ -1,9 +1,8 @@
 package me.ikevoodoo.smpcore.text.messaging;
 
+import me.ikevoodoo.smpcore.text.messaging.utils.MessageUtils;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Content;
 
 import java.util.ArrayList;
@@ -14,6 +13,30 @@ public class MessageBuilder {
 
     private final List<MessageComponent> messageComponents = new ArrayList<>();
 
+    private MessageBuilder() {
+
+    }
+
+    public static MessageBuilder create() {
+        return new MessageBuilder();
+    }
+
+    public static Message messageOf(String text) {
+        return MessageBuilder.create().add(text).build();
+    }
+
+    public static Message messageOf(Message message) {
+        return MessageBuilder.create().add(message).build();
+    }
+
+    public static MessageBuilder builderOf(String text) {
+        return MessageBuilder.create().add(text);
+    }
+
+    public static MessageBuilder builderOf(Message message) {
+        return MessageBuilder.create().add(message);
+    }
+
     // Starts a component
     public MessageBuilder add() {
         messageComponents.add(new MessageComponent());
@@ -21,11 +44,20 @@ public class MessageBuilder {
     }
 
     public MessageBuilder add(String text) {
+        return addComponent(MessageUtils.toTextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', text))));
+    }
+
+    public MessageBuilder addPlain(String text) {
         return add().text(text);
     }
 
     public MessageBuilder add(String text, ChatColor color) {
-        return add(text).color(color);
+        return addPlain(text).color(color);
+    }
+
+    public MessageBuilder add(Message message) {
+        message.components().forEach(this::addComponent);
+        return this;
     }
 
     public MessageBuilder text(String text) {
@@ -62,7 +94,7 @@ public class MessageBuilder {
     }
 
     public MessageBuilder link(String url, String text) {
-        return add(text).link(url);
+        return addPlain(text).link(url);
     }
 
     public MessageBuilder link(String url, ChatColor color) {
@@ -107,6 +139,37 @@ public class MessageBuilder {
         if(messageComponents.isEmpty())
             throw new IllegalStateException("No components added! Did you forget to call MessageBuilder#add()?");
         return messageComponents.get(messageComponents.size() - 1);
+    }
+
+    private MessageBuilder addComponent(BaseComponent comp) {
+        addPlain(comp.toLegacyText())
+                .color(comp.getColor());
+
+        ClickEvent event = comp.getClickEvent();
+        if (event != null) {
+            click(event.getAction(), event.getValue());
+        }
+
+        HoverEvent hoverEvent = comp.getHoverEvent();
+        if (event != null) {
+            hover(hoverEvent.getAction(), hoverEvent.getContents().toArray(new Content[0]));
+        }
+
+        if (comp.isBold())
+            properties(MessageProperty.BOLD);
+
+        if (comp.isItalic())
+            properties(MessageProperty.ITALIC);
+
+        if (comp.isObfuscated())
+            properties(MessageProperty.OBFUSCATED);
+
+        if (comp.isStrikethrough())
+            properties(MessageProperty.STRIKETHROUGH);
+
+        if (comp.isUnderlined())
+            properties(MessageProperty.UNDERLINE);
+        return this;
     }
 
 }

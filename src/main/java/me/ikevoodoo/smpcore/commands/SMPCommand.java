@@ -84,7 +84,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         }
 
         if (args.length == 0) {
-            return this.execute(sender, arguments);
+            return this.execute(new Context<>(sender, arguments));
         }
 
         SMPCommand subCommand = this.subCommands.get(args[0]);
@@ -92,7 +92,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
             return subCommand.onCommand(sender, command, label, List.of(args).subList(1, args.length).toArray(new String[0]));
         }
 
-        boolean res = this.execute(sender, arguments);
+        boolean res = this.execute(new Context<>(sender, arguments));
         if (res) {
             String successMessage = getSuccessMessage(sender, label, arguments);
             if(successMessage != null)
@@ -146,7 +146,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         return compatible;
     }
 
-    public abstract boolean execute(CommandSender sender, Arguments args);
+    public abstract boolean execute(Context<?> context);
 
     public String getInvalidSenderMessage(CommandUsable usable) {
         return switch (usable) {
@@ -190,7 +190,8 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
     }
 
     public final SMPCommand setUsable(CommandUsable usable) {
-        this.usable = usable;
+        if (usable != null)
+            this.usable = usable;
         return this;
     }
 

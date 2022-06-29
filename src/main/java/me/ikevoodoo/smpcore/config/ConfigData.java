@@ -41,11 +41,11 @@ public class ConfigData {
         }
         if(!this.file.exists()) {
             if (!this.file.getParentFile().mkdirs()) {
-                throw new IllegalStateException("Unable to create file parent folder: " + this.file.getParentFile().getAbsolutePath());
+                plugin.getLogger().warning("Unable to create file parent folder: " + this.file.getParentFile().getAbsolutePath());
             }
             try {
                 if(!this.file.createNewFile()) {
-                    throw new IllegalStateException("Unable to create file: " + this.file.getAbsolutePath());
+                    plugin.getLogger().warning("Unable to create file: " + this.file.getAbsolutePath());
                 }
                 loadConfig();
                 set(clazz, null, config);

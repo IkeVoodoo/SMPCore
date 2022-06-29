@@ -1,23 +1,28 @@
 package me.ikevoodoo.smpcore.menus;
 
+import me.ikevoodoo.smpcore.events.MenuPageOpenEvent;
 import me.ikevoodoo.smpcore.text.messaging.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class MenuPage {
 
     private final HashMap<UUID, Inventory> inventories = new HashMap<>();
     private final HashMap<Integer, ItemStack> stacks = new HashMap<>();
+    private final Menu menu;
     private PageData data;
 
-    protected MenuPage(PageData data) {
+    protected MenuPage(PageData data, Menu menu) {
         this.data = data;
+        this.menu = menu;
+    }
+
+    public Menu getParent() {
+        return this.menu;
     }
 
     public int size() {
@@ -41,9 +46,28 @@ public class MenuPage {
         this.updateInventories(datas);
     }
 
+    public void item(Player player, ItemData... datas) {
+        Inventory inv = this.inventories.get(player.getUniqueId());
+        if (inv == null) return;
+        for (ItemData data : datas) {
+            inv.setItem(data.slot(), data.stack());
+        }
+    }
+
+    public void fill(ItemStack stack) {
+        ItemStack[] items = new ItemStack[this.size()];
+        Arrays.fill(items, stack);
+        for (int i = 0; i < items.length; i++) {
+            this.stacks.put(i, items[i]);
+        }
+        this.updateInventories();
+    }
+
     public void open(Player player) {
         Inventory inventory = this.createInventory();
         this.inventories.put(player.getUniqueId(), inventory);
+        MenuPageOpenEvent event = new MenuPageOpenEvent(this, player);
+        Bukkit.getPluginManager().callEvent(event);
         player.openInventory(inventory);
     }
 
@@ -61,6 +85,14 @@ public class MenuPage {
         for (Inventory inventory : this.inventories.values()) {
             for (ItemData data : datas) {
                 inventory.setItem(data.slot(), data.stack());
+            }
+        }
+    }
+
+    private void updateInventories() {
+        for (Inventory inventory : this.inventories.values()) {
+            for (Map.Entry<Integer, ItemStack> entry : this.stacks.entrySet()) {
+                inventory.setItem(entry.getKey(), entry.getValue());
             }
         }
     }

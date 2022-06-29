@@ -1,5 +1,6 @@
 package me.ikevoodoo.smpcore.menus;
 
+import me.ikevoodoo.smpcore.SMPPlugin;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
@@ -11,11 +12,16 @@ public class Menu {
     private final HashMap<UUID, Integer> viewingPage = new HashMap<>();
 
     private final NamespacedKey id;
+    private final SMPPlugin plugin;
 
-    public Menu(NamespacedKey id) {
+    public Menu(SMPPlugin plugin, String id) {
+        this.id = plugin.makeKey(id);
+        this.plugin = plugin;
+    }
+
+    public Menu(SMPPlugin plugin, NamespacedKey id) {
         this.id = id;
-        if (this.id == null)
-            throw new IllegalArgumentException("Menu ID can't be null!");
+        this.plugin = plugin;
     }
 
     public NamespacedKey id() {
@@ -26,12 +32,16 @@ public class Menu {
         return this.id.equals(id);
     }
 
+    public boolean is(String id) {
+        return this.is(this.plugin.makeKey(id));
+    }
+
     public boolean isViewer(Player player) {
         return this.viewingPage.containsKey(player.getUniqueId());
     }
 
     public MenuPage page(PageData data) {
-        MenuPage page = new MenuPage(data);
+        MenuPage page = new MenuPage(data, this);
         this.pages.add(page);
         return page;
     }

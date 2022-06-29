@@ -52,6 +52,8 @@ public abstract class CustomItem {
 
     private final SMPPlugin plugin;
 
+    private boolean enabled;
+
     protected CustomItem(SMPPlugin plugin, String id, Message friendlyName) {
         this.plugin = plugin;
         this.id = id;
@@ -68,6 +70,10 @@ public abstract class CustomItem {
 
     public static void give(Player player, CustomItem customItem) {
         player.getInventory().addItem(customItem.getItemStack());
+    }
+
+    public final void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public final ItemStack getItemStack() {

@@ -1,21 +1,28 @@
 package me.ikevoodoo.smpcore.text.messaging;
 
+import me.ikevoodoo.smpcore.text.messaging.utils.MessageUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Message {
 
     private final TextComponent msg;
+    private final List<BaseComponent> comps = new ArrayList<>();
 
     protected Message(BaseComponent[] components) {
-        // merge components
-        TextComponent comp = new TextComponent();
-        for (BaseComponent component : components) comp.addExtra(component);
+        Collections.addAll(this.comps, components);
+        this.msg = MessageUtils.toTextComponent(components);
+    }
 
-        this.msg = comp;
+    public List<BaseComponent> components() {
+        return new ArrayList<>(this.comps);
     }
 
     public TextComponent component() {

@@ -5,6 +5,8 @@ import me.ikevoodoo.smpcore.annotations.Property;
 import me.ikevoodoo.smpcore.callbacks.blocks.PlayerPlaceBlockCallback;
 import me.ikevoodoo.smpcore.callbacks.items.PlayerUseItemCallback;
 import me.ikevoodoo.smpcore.commands.SMPCommand;
+import me.ikevoodoo.smpcore.commands.functional.CommandCreator;
+import me.ikevoodoo.smpcore.commands.functional.FunctionalCommand;
 import me.ikevoodoo.smpcore.config.ConfigData;
 import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
@@ -12,7 +14,11 @@ import me.ikevoodoo.smpcore.config.annotations.Config;
 import me.ikevoodoo.smpcore.handlers.*;
 import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
+import me.ikevoodoo.smpcore.items.functional.FunctionalItem;
+import me.ikevoodoo.smpcore.items.functional.ItemCreator;
 import me.ikevoodoo.smpcore.listeners.*;
+import me.ikevoodoo.smpcore.menus.functional.FunctionalMenu;
+import me.ikevoodoo.smpcore.menus.functional.MenuCreator;
 import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
@@ -42,7 +48,7 @@ import static me.ikevoodoo.smpcore.senders.CustomSender.as;
 import static me.ikevoodoo.smpcore.senders.SenderBuilder.createNewSender;
 
 @SuppressWarnings("unused")
-public abstract class SMPPlugin extends JavaPlugin {
+public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, MenuCreator, ItemCreator {
 
     private EliminationHandler eliminationHandler;
     private JoinActionHandler joinActionHandler;
@@ -80,7 +86,7 @@ public abstract class SMPPlugin extends JavaPlugin {
         inventoryActionHandler = new InventoryActionHandler(this);
         resourcePackHandler = new ResourcePackHandler(this);
         chatInputHandler = new ChatInputHandler(this);
-        menuHandler = new MenuHandler();
+        menuHandler = new MenuHandler(this);
 
         recipeLoader = new RecipeLoader(this);
         playerUseListener = new PlayerUseListener(this);
@@ -308,6 +314,24 @@ public abstract class SMPPlugin extends JavaPlugin {
         return new NamespacedKey(this, id);
     }
 
+    public final FunctionalCommand createCommand() {
+        return this.createCommand(this);
+    }
+
+    public final FunctionalMenu createMenu() {
+        return this.createMenu(this);
+    }
+
+    public final FunctionalItem createItem() {
+        return this.createItem(this);
+    }
+
+    public final void registerItem(CustomItem item) {
+        if (item == null)
+            throw new IllegalStateException("Item must not be null!");
+        this.customItems.put(item.getId(), item);
+    }
+
     public static SMPPlugin getById(String id) {
         return Bukkit.getPluginManager().getPlugin(id) instanceof SMPPlugin smpPlugin ? smpPlugin : null;
     }
@@ -326,7 +350,7 @@ public abstract class SMPPlugin extends JavaPlugin {
         findItemClasses(classes).forEach(clazz -> {
             CustomItem item = getClassInstance(clazz.asSubclass(CustomItem.class));
             assert item != null;
-            customItems.put(item.getId(), item);
+            registerItem(item);
         });
     }
 

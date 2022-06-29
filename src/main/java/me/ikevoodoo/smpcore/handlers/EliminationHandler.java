@@ -18,6 +18,7 @@ import java.util.UUID;
 public final class EliminationHandler extends PluginProvider {
 
     private final NamespacedKey eliminationKey;
+    private final NamespacedKey bannedAtKey;
 
     private final List<EliminationCallback> eliminationCallbacks = new ArrayList<>();
     private final List<EliminationCallback> reviveCallbacks = new ArrayList<>();
@@ -25,6 +26,7 @@ public final class EliminationHandler extends PluginProvider {
     public EliminationHandler(SMPPlugin plugin) {
         super(plugin);
         eliminationKey = makeKey("eliminated_player");
+        bannedAtKey = makeKey("eliminated_at");
     }
 
     public void eliminate(Player player) {
@@ -41,6 +43,7 @@ public final class EliminationHandler extends PluginProvider {
     public void eliminate(Player player, long banTime) {
         PersistentDataContainer container = player.getPersistentDataContainer();
         container.set(eliminationKey, PersistentDataType.LONG, banTime);
+        container.set(bannedAtKey, PersistentDataType.LONG, System.currentTimeMillis());
         eliminationCallbacks.forEach(callback -> callback.whenTriggered(EliminationType.ELIMINATED, player));
     }
 
@@ -62,9 +65,16 @@ public final class EliminationHandler extends PluginProvider {
         return value == null ? 0 : value;
     }
 
+    public long getBannedAt(Player player) {
+        PersistentDataContainer container = player.getPersistentDataContainer();
+        Long value = container.get(bannedAtKey, PersistentDataType.LONG);
+        return value == null ? 0 : value;
+    }
+
     public void revive(Player player) {
         PersistentDataContainer container = player.getPersistentDataContainer();
         container.remove(eliminationKey);
+        container.remove(bannedAtKey);
         reviveCallbacks.forEach(callback -> callback.whenTriggered(EliminationType.REVIVED, player));
     }
 
@@ -103,7 +113,11 @@ public final class EliminationHandler extends PluginProvider {
     }
 
     public void reviveOffline(OfflinePlayer player) {
-        getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), this::revive);
+        if (player == null)
+            return;
+        if (player.isOnline())
+            this.revive(player.getPlayer());
+        else getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), this::revive);
     }
 
     public void eliminateOffline(OfflinePlayer player) {
@@ -111,7 +125,11 @@ public final class EliminationHandler extends PluginProvider {
     }
 
     public void eliminateOffline(OfflinePlayer player, long banTime) {
-        getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), id -> eliminate(id, banTime));
+        if (player == null)
+            return;
+        if (player.isOnline())
+            this.eliminate(player.getUniqueId(), banTime);
+        else getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), id -> eliminate(id, banTime));
     }
     
 }
