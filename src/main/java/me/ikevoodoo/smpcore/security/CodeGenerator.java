@@ -38,11 +38,11 @@ public class CodeGenerator {
         System.arraycopy(special, 0, alphabetSpecial, alphabet.length, special.length);
 
         System.arraycopy(special, 0, specialDigits, 0, special.length);
-        System.arraycopy(digits, 0, specialDigits, special.length, digits.length);;
+        System.arraycopy(digits, 0, specialDigits, special.length, digits.length);
 
         System.arraycopy(alphabet, 0, alphabetSpecialDigits, 0, alphabet.length);
         System.arraycopy(special, 0, alphabetSpecialDigits, alphabet.length, special.length);
-        System.arraycopy(digits, 0, alphabetSpecialDigits, alphabet.length + special.length, digits.length);;
+        System.arraycopy(digits, 0, alphabetSpecialDigits, alphabet.length + special.length, digits.length);
     }
 
     public static String generate(int length, int flags) {
