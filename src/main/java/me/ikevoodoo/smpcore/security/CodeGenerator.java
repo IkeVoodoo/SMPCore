@@ -77,18 +77,4 @@ public class CodeGenerator {
         return new String(buffer);
     }
 
-    public static void main(String[] args) {
-        int iterationAmount = 10000;
-
-
-        long averageTime = 0;
-        for (int i = 0; i < iterationAmount + 10; i++) {
-            long time = System.nanoTime();
-            generate(128, USE_ALPHABET | USE_NUMBERS | USE_SPECIAL);
-            if (i > 10) averageTime += System.nanoTime() - time;
-            if (i == 0) System.out.println("First run: "+(System.nanoTime() - time));
-        }
-        System.out.println("Average over "+iterationAmount+" iterations: "+(averageTime / iterationAmount));
-    }
-
 }
