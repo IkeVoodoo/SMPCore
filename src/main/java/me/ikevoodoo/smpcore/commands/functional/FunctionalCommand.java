@@ -90,7 +90,21 @@ public class FunctionalCommand extends PluginProvider implements FunctionalLoopB
         return this;
     }
 
+    public FunctionalCommand sub(SMPCommand command) {
+        this.subCommands.add(command);
+        return this;
+    }
+
+    public FunctionalCommand sub(FunctionalCommand command) {
+        this.subFunctional.add(command);
+        return this;
+    }
+
     public void register() {
+        this.getPlugin().addCommand(getCommand());
+    }
+
+    private SMPCommand getCommand() {
         if (this.name == null)
             throw new IllegalStateException("Cannot register a command without a name! Plugin: " + this.getPlugin().getName());
         SMPCommand command = new SMPCommand(this.getPlugin(), this.name, null) {
@@ -125,7 +139,10 @@ public class FunctionalCommand extends PluginProvider implements FunctionalLoopB
         command.setUsable(this.usable);
         command.setArgs(this.arguments.toArray(new Argument[0]));
         command.setPermission(this.perm);
-        this.getPlugin().addCommand(command);
+        List<SMPCommand> sub = new ArrayList<>(this.subCommands);
+        for (FunctionalCommand cmd : this.subFunctional)
+            sub.add(cmd.getCommand());
+        command.registerSubCommands(sub.toArray(new SMPCommand[0]));
+        return command;
     }
-
 }

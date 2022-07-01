@@ -2,9 +2,9 @@ package me.ikevoodoo.smpcore.items;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.functions.SerializableConsumer;
-import me.ikevoodoo.smpcore.text.messaging.Message;
 import me.ikevoodoo.smpcore.recipes.RecipeData;
 import me.ikevoodoo.smpcore.recipes.RecipeOptions;
+import me.ikevoodoo.smpcore.text.messaging.Message;
 import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,7 +52,7 @@ public abstract class CustomItem {
 
     private final SMPPlugin plugin;
 
-    private boolean enabled;
+    private boolean enabled = true;
 
     protected CustomItem(SMPPlugin plugin, String id, Message friendlyName) {
         this.plugin = plugin;
@@ -74,6 +74,10 @@ public abstract class CustomItem {
 
     public final void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public final boolean isEnabled() {
+        return this.enabled;
     }
 
     public final ItemStack getItemStack() {
@@ -184,7 +188,9 @@ public abstract class CustomItem {
 
     public final ItemClickResult tryClick(Player player, ItemStack itemStack, Action action) {
         try {
-            return this.onClick(player, itemStack, action);
+            if (this.enabled)
+                return this.onClick(player, itemStack, action);
+            return new ItemClickResult(ItemClickState.IGNORE, true);
         } catch (Exception e) {
             return new ItemClickResult(ItemClickState.FAIL, true);
         }
@@ -213,7 +219,7 @@ public abstract class CustomItem {
         if(old != null && Bukkit.getRecipe(old) != null)
             Bukkit.removeRecipe(old);
 
-        if(newRecipe != null)
+        if(newRecipe != null && this.enabled)
             Bukkit.addRecipe(newRecipe.getSecond());
 
         this.recipe = newRecipe;

@@ -5,6 +5,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Menu {
 
@@ -13,6 +14,7 @@ public class Menu {
 
     private final NamespacedKey id;
     private final SMPPlugin plugin;
+    private final List<Consumer<Player>> openListeners = new ArrayList<>();
 
     public Menu(SMPPlugin plugin, String id) {
         this.id = plugin.makeKey(id);
@@ -56,6 +58,7 @@ public class Menu {
         closePage(player);
         MenuPage first = this.pages.get(0);
         first.open(player);
+        this.openListeners.forEach(listener -> listener.accept(player));
         this.viewingPage.put(player.getUniqueId(), 0);
     }
 
@@ -78,6 +81,10 @@ public class Menu {
     public void close(Player player) {
         closePage(player);
         player.closeInventory();
+    }
+
+    public void onOpen(Consumer<Player> listener) {
+        this.openListeners.add(listener);
     }
 
     private void move(Player player, int amount) {

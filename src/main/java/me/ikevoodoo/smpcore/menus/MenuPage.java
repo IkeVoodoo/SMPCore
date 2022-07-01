@@ -8,11 +8,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class MenuPage {
 
     private final HashMap<UUID, Inventory> inventories = new HashMap<>();
     private final HashMap<Integer, ItemStack> stacks = new HashMap<>();
+    private final List<Consumer<Player>> openListeners = new ArrayList<>();
     private final Menu menu;
     private PageData data;
 
@@ -68,11 +70,16 @@ public class MenuPage {
         this.inventories.put(player.getUniqueId(), inventory);
         MenuPageOpenEvent event = new MenuPageOpenEvent(this, player);
         Bukkit.getPluginManager().callEvent(event);
+        this.openListeners.forEach(listener -> listener.accept(player));
         player.openInventory(inventory);
     }
 
     public void close(Player player) {
         this.inventories.remove(player.getUniqueId());
+    }
+
+    public void onOpen(Consumer<Player> listener) {
+        this.openListeners.add(listener);
     }
 
     private Inventory createInventory() {
