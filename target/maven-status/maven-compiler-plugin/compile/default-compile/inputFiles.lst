@@ -4,6 +4,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\confi
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\StringUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\fileserver\FileServerConnector.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\functional\loop\FunctionalLoopBase.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\particles\ParticleInfo.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\random\RandomBase.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\SMPPlugin.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\functional\CommandReturn.java
@@ -23,6 +24,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\comma
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\CommandUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\ResourcePackHandler.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\fileserver\FileServer.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\math\helper\LineHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\URLUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\chat\ChatInputHandler.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\BooleanParser.java
@@ -50,8 +52,8 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\world
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\senders\CustomSender.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\annotations\Property.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\ExceptionUtils.java
-C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\MathUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\IntParser.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\math\helper\PositionHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\callbacks\items\PlayerUseItemCallback.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\fileserver\FileServerResponse.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\ConfigHelper.java
@@ -88,6 +90,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\comma
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\annotations\Config.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\events\PlayerPreDeathEvent.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\functional\loop\FunctionalLoop.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\math\utils\MathUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\annotations\NoInject.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\shared\PluginProvider.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\annotations\IntDefault.java
@@ -96,6 +99,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\reflection\NMSReflectionHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\messaging\MessageBuilder.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\messaging\MessageComponent.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\security\CodeGenerator.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\functional\FunctionalBase.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\PlayerParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\ConfigData.java
@@ -103,9 +107,11 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\items
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\messaging\Message.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\PlayerSleepListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\random\MaterialUtils.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\particles\ParticleRendererBase.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\Context.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\annotations\StringDefault.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\CommandUsable.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\ConfigHandler.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\HashUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\recipes\RecipeData.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\particles\PolygonParticleRenderer.java

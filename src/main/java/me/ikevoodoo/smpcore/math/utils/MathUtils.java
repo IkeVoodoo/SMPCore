@@ -1,4 +1,4 @@
-package me.ikevoodoo.smpcore.utils;
+package me.ikevoodoo.smpcore.math.utils;
 
 public class MathUtils {
 
