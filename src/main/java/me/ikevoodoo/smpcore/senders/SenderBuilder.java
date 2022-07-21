@@ -33,7 +33,7 @@ public class SenderBuilder {
             }
 
             @Override
-            public void sendMessage(UUID s1, String message) {
+            public void sendMessage(UUID s1, @NotNull String message) {
                 if (sender.isLog())
                     finalS.sendMessage(s1, message);
             }

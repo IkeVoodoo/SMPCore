@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 
+@SuppressWarnings("unused")
 public abstract class PluginProvider {
 
     private final SMPPlugin plugin;

@@ -5,9 +5,7 @@ import java.security.SecureRandom;
 
 public class CodeGenerator {
 
-    private CodeGenerator() {
-
-    }
+    private CodeGenerator() {}
 
     public static final int USE_ALPHABET = 2;
     public static final int USE_NUMBERS = 3;
