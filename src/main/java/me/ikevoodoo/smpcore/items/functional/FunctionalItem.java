@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class FunctionalItem extends PluginProvider implements FunctionalLoopBase {
 
@@ -23,6 +24,8 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
     private Message friendlyName;
     private Supplier<Material> material;
     private Supplier<Message> name;
+
+    private final List<Supplier<Message>> loreSuppliers = new ArrayList<>();
     private final List<BiConsumer<Player, ItemStack>> consumers = new ArrayList<>();
 
     protected FunctionalItem(SMPPlugin plugin) {
@@ -54,6 +57,11 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
         return this;
     }
 
+    public FunctionalItem lore(Supplier<Message> supplier) {
+        this.loreSuppliers.add(supplier);
+        return this;
+    }
+
     public ItemStack asItem() {
         return this.toItem().getItemStack();
     }
@@ -74,7 +82,7 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
             public ItemStack createItem(Player player) {
                 ItemStack stack = new ItemStack(material != null ? material.get() : Material.STONE);
                 ItemMeta meta = stack.getItemMeta();
-                if (name != null)
+                if (name != null && meta != null)
                     meta.setDisplayName(name.get().text());
                 stack.setItemMeta(meta);
                 return stack;
@@ -82,15 +90,21 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
 
             @Override
             protected ItemClickResult onClick(Player player, ItemStack itemStack, Action action) {
-                for (BiConsumer<Player, ItemStack> consumer : consumers) {
+                for (BiConsumer<Player, ItemStack> consumer : consumers)
                     consumer.accept(player, itemStack);
-                }
 
                 return super.onClick(player, itemStack, action);
             }
-        }.addKey(this.id);
+        }.addKey(this.id + "_key").setLore(this::getLore);
         item.reload();
         return item;
+    }
+
+    private List<String> getLore() {
+        return this.loreSuppliers
+                .stream()
+                .map(supplier -> supplier.get().text())
+                .collect(Collectors.toList());
     }
 
 }

@@ -3,8 +3,7 @@ package me.ikevoodoo.smpcore.listeners;
 import me.ikevoodoo.smpcore.events.PlayerPreDeathEvent;
 import me.ikevoodoo.smpcore.events.TotemCheckEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,7 +22,7 @@ public class PlayerDamageListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void on(EntityDamageEvent event) {
         if(event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
-                || event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE
+                || (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE)
                 || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
                 || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) return;
 
@@ -31,17 +30,23 @@ public class PlayerDamageListener implements Listener {
             event.setCancelled(true);
     }
 
-    private boolean check(Entity entity, double finalDamage, Entity damager) {
-        if(!(entity instanceof Player player))
+    private boolean check(Entity killed, double finalDamage, Entity killer) {
+        if(!(killed instanceof Player killedPlayer))
             return false;
 
-        TotemCheckEvent totemCheckEvent = new TotemCheckEvent(player);
+        Entity killerEntity = killer;
+        if (killer instanceof Arrow arrow && (arrow.getShooter() instanceof Entity e))
+            killerEntity = e;
+        if (killer instanceof TNTPrimed primed)
+            killerEntity = primed.getSource();
+
+        TotemCheckEvent totemCheckEvent = new TotemCheckEvent(killedPlayer);
         Bukkit.getPluginManager().callEvent(totemCheckEvent);
 
-        if(totemCheckEvent.hasTotem() || player.getHealth() - finalDamage > 0)
+        if(totemCheckEvent.hasTotem() || killedPlayer.getHealth() - finalDamage > 0)
             return false;
 
-        PlayerPreDeathEvent playerPreDeathEvent = new PlayerPreDeathEvent(player, damager);
+        PlayerPreDeathEvent playerPreDeathEvent = new PlayerPreDeathEvent(killedPlayer, killerEntity);
         Bukkit.getPluginManager().callEvent(playerPreDeathEvent);
 
         return playerPreDeathEvent.isCancelled();

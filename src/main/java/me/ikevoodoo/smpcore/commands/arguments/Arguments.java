@@ -14,7 +14,7 @@ public class Arguments implements Iterable<Integer> {
     private static final int SEARCHING_TOKEN = 2;
 
     private final List<String> args;
-    private List<Argument> types;
+    private List<ArgumentWrapper> types;
     private final CommandSender sender;
 
     public Arguments(CommandSender sender, String[] args) {
@@ -22,11 +22,12 @@ public class Arguments implements Iterable<Integer> {
         this.sender = sender;
     }
 
-    public boolean match(List<Argument> args) {
+    public boolean match(List<ArgumentWrapper> args) {
         types = args;
         int currIndex = 0;
 
-        for (Argument arg : args) {
+        for (ArgumentWrapper wrapper : args) {
+            Argument arg = wrapper.getArgument();
             if(!has(arg.type())) {
                 return false;
             }
@@ -50,7 +51,8 @@ public class Arguments implements Iterable<Integer> {
     private int find(String name) {
         int currIndex = 0;
 
-        for (Argument arg : types) {
+        for (ArgumentWrapper wrapper : types) {
+            Argument arg = wrapper.getArgument();
             if (arg.name().equalsIgnoreCase(name)) {
                 return currIndex;
             }

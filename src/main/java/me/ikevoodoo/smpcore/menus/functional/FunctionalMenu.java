@@ -30,8 +30,18 @@ public class FunctionalMenu extends PluginProvider implements FunctionalLoopBase
         return new FunctionalPage(getPlugin(), this, this.menu.page(data));
     }
 
-    public void register() {
+    public FunctionalMenu add(Menu menu) {
+        this.menu.add(menu);
+        return this;
+    }
+
+    public FunctionalMenu add(FunctionalMenu menu) {
+        return this.add(menu.register());
+    }
+
+    public Menu register() {
         getPlugin().getMenuHandler().add(this.menu);
+        return this.menu;
     }
 
 }

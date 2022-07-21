@@ -42,6 +42,13 @@ public class MenuPage {
         return Optional.ofNullable(this.stacks.get(slot));
     }
 
+    public Optional<ItemStack> item(Player player, int slot) {
+        Inventory inv = this.inventories.get(player.getUniqueId());
+        if (inv == null) return Optional.empty();
+
+        return Optional.ofNullable(inv.getItem(slot));
+    }
+
     public void item(ItemData... datas) {
         for (ItemData data : datas)
             this.stacks.put(data.slot(), data.stack());
@@ -52,7 +59,7 @@ public class MenuPage {
         Inventory inv = this.inventories.get(player.getUniqueId());
         if (inv == null) return;
         for (ItemData data : datas) {
-            inv.setItem(data.slot(), data.stack());
+            inv.setItem(getSlot(inv, data), data.stack());
         }
     }
 
@@ -65,13 +72,48 @@ public class MenuPage {
         this.updateInventories();
     }
 
+    public int last() {
+        return this.size() - 1;
+    }
+
+    public int first() {
+        return 0;
+    }
+
+    public int last(int row) {
+        return Math.min(row, this.size() / 9) - 1;
+    }
+
+    public int first(int row) {
+        return Math.max(Math.min(row, this.size() / 9) - 1, 0) * 9;
+    }
+
+    public void last(ItemStack stack) {
+        this.stacks.put(last(), stack);
+    }
+
+    public void first(ItemStack stack) {
+        this.stacks.put(first(), stack);
+    }
+
+    public void last(int row, ItemStack stack) {
+        this.stacks.put(last(row), stack);
+    }
+
+    public void first(int row, ItemStack stack) {
+        this.stacks.put(first(row), stack);
+    }
+
     public void open(Player player) {
         Inventory inventory = this.createInventory();
         this.inventories.put(player.getUniqueId(), inventory);
         MenuPageOpenEvent event = new MenuPageOpenEvent(this, player);
         Bukkit.getPluginManager().callEvent(event);
-        this.openListeners.forEach(listener -> listener.accept(player));
         player.openInventory(inventory);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(getParent().getPlugin(), () -> {
+            for (Consumer<Player> listener : this.openListeners)
+                listener.accept(player);
+        }, 1);
     }
 
     public void close(Player player) {
@@ -84,23 +126,31 @@ public class MenuPage {
 
     private Inventory createInventory() {
         Inventory inventory = Bukkit.createInventory(null, this.size(), this.title().text());
-        stacks.forEach(inventory::setItem);
+        this.stacks.forEach(inventory::setItem);
         return inventory;
     }
 
-    private void updateInventories(ItemData... datas) {
+    public void updateInventories(ItemData... datas) {
         for (Inventory inventory : this.inventories.values()) {
             for (ItemData data : datas) {
-                inventory.setItem(data.slot(), data.stack());
+                inventory.setItem(getSlot(inventory, data), data.stack());
             }
         }
     }
 
-    private void updateInventories() {
+    public void updateInventories() {
         for (Inventory inventory : this.inventories.values()) {
             for (Map.Entry<Integer, ItemStack> entry : this.stacks.entrySet()) {
-                inventory.setItem(entry.getKey(), entry.getValue());
+                inventory.setItem(getSlot(inventory, entry.getKey()), entry.getValue());
             }
         }
+    }
+
+    private int getSlot(Inventory inv, ItemData data) {
+        return getSlot(inv, data.slot());
+    }
+
+    private int getSlot(Inventory inv, int slot) {
+        return slot < 0 ? inv.getSize() - slot : slot;
     }
 }

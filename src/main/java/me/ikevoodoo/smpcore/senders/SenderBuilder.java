@@ -7,17 +7,12 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.UUID;
 
-import static me.ikevoodoo.smpcore.senders.CustomSender.as;
-
 public class SenderBuilder {
-
-    public static void main(String[] args) {
-        Bukkit.dispatchCommand(createNewSender(as().noLog().console()), "say hi");
-    }
     
     public static CommandSender createNewSender(CustomSender sender) {
         CommandSender s = sender.getSender();
@@ -26,7 +21,7 @@ public class SenderBuilder {
         CommandSender finalS = s;
         return new CommandSender() {
             @Override
-            public void sendMessage(String message) {
+            public void sendMessage(@NotNull String message) {
                 if(sender.isLog())
                     finalS.sendMessage(message);
             }
@@ -50,62 +45,62 @@ public class SenderBuilder {
             }
 
             @Override
-            public Server getServer() {
+            public @NotNull Server getServer() {
                 return finalS.getServer();
             }
 
             @Override
-            public String getName() {
+            public @NotNull String getName() {
                 return finalS.getName();
             }
 
             @Override
-            public Spigot spigot() {
+            public @NotNull Spigot spigot() {
                 return finalS.spigot();
             }
 
             @Override
-            public boolean isPermissionSet(String name) {
+            public boolean isPermissionSet(@NotNull String name) {
                 return finalS.isPermissionSet(name);
             }
 
             @Override
-            public boolean isPermissionSet(Permission perm) {
+            public boolean isPermissionSet(@NotNull Permission perm) {
                 return finalS.isPermissionSet(perm);
             }
 
             @Override
-            public boolean hasPermission(String name) {
+            public boolean hasPermission(@NotNull String name) {
                 return finalS.hasPermission(name);
             }
 
             @Override
-            public boolean hasPermission(Permission perm) {
+            public boolean hasPermission(@NotNull Permission perm) {
                 return finalS.hasPermission(perm);
             }
 
             @Override
-            public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
+            public @NotNull PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String name, boolean value) {
                 return finalS.addAttachment(plugin, name, value);
             }
 
             @Override
-            public PermissionAttachment addAttachment(Plugin plugin) {
+            public @NotNull PermissionAttachment addAttachment(@NotNull Plugin plugin) {
                 return finalS.addAttachment(plugin);
             }
 
             @Override
-            public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
+            public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String name, boolean value, int ticks) {
                 return finalS.addAttachment(plugin, name, value, ticks);
             }
 
             @Override
-            public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
+            public PermissionAttachment addAttachment(@NotNull Plugin plugin, int ticks) {
                 return finalS.addAttachment(plugin, ticks);
             }
 
             @Override
-            public void removeAttachment(PermissionAttachment attachment) {
+            public void removeAttachment(@NotNull PermissionAttachment attachment) {
                 finalS.removeAttachment(attachment);
             }
 
@@ -115,7 +110,7 @@ public class SenderBuilder {
             }
 
             @Override
-            public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+            public @NotNull Set<PermissionAttachmentInfo> getEffectivePermissions() {
                 return finalS.getEffectivePermissions();
             }
 

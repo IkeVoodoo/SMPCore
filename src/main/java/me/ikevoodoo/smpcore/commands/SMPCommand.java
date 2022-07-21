@@ -2,6 +2,7 @@ package me.ikevoodoo.smpcore.commands;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.commands.arguments.Argument;
+import me.ikevoodoo.smpcore.commands.arguments.ArgumentWrapper;
 import me.ikevoodoo.smpcore.commands.arguments.Arguments;
 import me.ikevoodoo.smpcore.commands.arguments.OptionalFor;
 import me.ikevoodoo.smpcore.shared.PluginProvider;
@@ -11,6 +12,7 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public abstract class SMPCommand extends PluginProvider implements CommandExecutor, TabCompleter {
 
@@ -21,7 +23,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
     private String permission;
     private CommandUsable usable = CommandUsable.ALL;
-    private List<Argument> args = new ArrayList<>();
+    private List<ArgumentWrapper> args = new ArrayList<>();
 
     public SMPCommand(SMPPlugin plugin, String name, String permission) {
         super(plugin);
@@ -115,20 +117,29 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         }
         this.subCommands.forEach((key, sub) -> out.add(key));
 
-        List<Argument> sub;
+        List<ArgumentWrapper> sub;
         if (strings.length - 1 > this.args.size()) sub = new ArrayList<>();
         else sub = this.args.subList(Math.max(0, strings.length - 1), this.args.size());
 
-        for (Argument arg : sub) {
-            out.addAll(getCompatible(commandSender, arg));
-            if (arg.required()) break;
+        Arguments arguments = new Arguments(commandSender, strings);
+        Context<?> ctx = new Context<>(commandSender, arguments);
+
+        for (ArgumentWrapper wrapper : sub) {
+            out.addAll(getCompatible(ctx, wrapper));
+            if (wrapper.getArgument().required()) break;
         }
 
         return out;
     }
 
-    private List<String> getCompatible(CommandSender sender, Argument arg) {
+    private List<String> getCompatible(Context<?> ctx, ArgumentWrapper wrapper) {
         List<String> compatible = new ArrayList<>();
+        Argument arg = wrapper.getArgument();
+
+        if (wrapper.hasTabCompletion()) {
+            List<String> completion = wrapper.getTabCompletion(ctx);
+            if (completion != null && !completion.isEmpty()) return completion;
+        }
 
         if (arg.type() == Player.class) {
             Bukkit.getOnlinePlayers().forEach(plr -> compatible.add(plr.getName()));
@@ -141,7 +152,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
             return compatible;
         }
 
-        String[] border = getArgumentBorder(sender, arg);
+        String[] border = getArgumentBorder(ctx.source(), arg);
         compatible.add(border[0].trim() + arg.name() + border[1]);
         return compatible;
     }
@@ -178,7 +189,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
     }
 
     public final void setArgs(Argument... args) {
-        this.args = List.of(args);
+        this.args = Stream.of(args).map(ArgumentWrapper::new).toList();
     }
 
     public final SMPCommand registerSubCommands(SMPCommand... commands) {
@@ -249,7 +260,8 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
     public final String getPath(CommandSender sender) {
         StringBuilder sb = new StringBuilder();
-        for (Argument argument : args) {
+        for (ArgumentWrapper wrapper : args) {
+            Argument argument = wrapper.getArgument();
             String[] border = getArgumentBorder(sender, argument);
             if (!argument.required()) {
                 sb.append(border[0]).append(argument.name()).append(border[1]);
@@ -297,7 +309,8 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         List<String> paths = new ArrayList<>();
         StringBuilder sb = new StringBuilder(initial);
         for (int i = start; i < args.size() ; i++) {
-            Argument argument = args.get(i);
+            ArgumentWrapper wrapper = args.get(i);
+            Argument argument = wrapper.getArgument();
             if(!argument.required()) {
                 String s = sb + " <" + argument.name() + ">";
                 sb.append(" [").append(argument.name()).append("]");

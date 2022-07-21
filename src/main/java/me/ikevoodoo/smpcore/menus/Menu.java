@@ -7,23 +7,23 @@ import org.bukkit.entity.Player;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Menu {
+public class Menu extends MenuHolder {
 
     private final List<MenuPage> pages = new ArrayList<>();
     private final HashMap<UUID, Integer> viewingPage = new HashMap<>();
+    private final HashMap<UUID, Integer> lastPages = new HashMap<>();
 
     private final NamespacedKey id;
-    private final SMPPlugin plugin;
     private final List<Consumer<Player>> openListeners = new ArrayList<>();
 
     public Menu(SMPPlugin plugin, String id) {
-        this.id = plugin.makeKey(id);
-        this.plugin = plugin;
+        super(plugin);
+        this.id = makeKey(id);
     }
 
     public Menu(SMPPlugin plugin, NamespacedKey id) {
+        super(plugin);
         this.id = id;
-        this.plugin = plugin;
     }
 
     public NamespacedKey id() {
@@ -35,7 +35,7 @@ public class Menu {
     }
 
     public boolean is(String id) {
-        return this.is(this.plugin.makeKey(id));
+        return this.is(this.getPlugin().makeKey(id));
     }
 
     public boolean isViewer(Player player) {
@@ -62,6 +62,16 @@ public class Menu {
         this.viewingPage.put(player.getUniqueId(), 0);
     }
 
+    public void openLast(Player player) {
+        if (this.pages.isEmpty()) return;
+        closePage(player);
+        int page = this.lastPages.getOrDefault(player.getUniqueId(), 0);
+        MenuPage first = this.pages.get(page);
+        first.open(player);
+        this.openListeners.forEach(listener -> listener.accept(player));
+        this.viewingPage.put(player.getUniqueId(), page);
+    }
+
     public void next(Player player) {
         move(player, 1);
     }
@@ -74,6 +84,7 @@ public class Menu {
         if (this.pages.isEmpty() || page >= this.pages.size() || page < 0) return;
         closePage(player);
         this.viewingPage.put(player.getUniqueId(), page);
+        this.lastPages.put(player.getUniqueId(), page);
         MenuPage menu = this.pages.get(page);
         menu.open(player);
     }
@@ -97,6 +108,7 @@ public class Menu {
         MenuPage menu = this.pages.get(page);
         menu.open(player);
         this.viewingPage.put(player.getUniqueId(), page);
+        this.lastPages.put(player.getUniqueId(), page);
     }
 
     private void closePage(Player player) {

@@ -8,6 +8,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\parti
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\random\RandomBase.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\SMPPlugin.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\functional\CommandReturn.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\PDCUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\ItemUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\functional\MenuCreator.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\fileserver\FileServerRequest.java
@@ -27,6 +28,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\files
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\math\helper\LineHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\URLUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\chat\ChatInputHandler.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\ArgumentWrapper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\BooleanParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\OfflinePlayerParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\JoinActionHandler.java
@@ -55,6 +57,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\IntParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\math\helper\PositionHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\callbacks\items\PlayerUseItemCallback.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderHandler.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\fileserver\FileServerResponse.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\ConfigHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\messaging\MessageProperty.java
@@ -82,6 +85,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\event
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\senders\SenderBuilder.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\PlayerDamageListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\players\FakePlayerMessageHandler.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderBuilder.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\InventoryEditListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\MenuPage.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\PageData.java
@@ -102,6 +106,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\security\CodeGenerator.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\functional\FunctionalBase.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\PlayerParser.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\MenuHolder.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\ConfigData.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\items\ItemClickState.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\messaging\Message.java

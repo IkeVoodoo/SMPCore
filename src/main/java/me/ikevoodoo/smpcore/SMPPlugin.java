@@ -21,6 +21,7 @@ import me.ikevoodoo.smpcore.menus.functional.FunctionalMenu;
 import me.ikevoodoo.smpcore.menus.functional.MenuCreator;
 import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
+import me.ikevoodoo.smpcore.utils.PDCUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
 import org.bukkit.Bukkit;
@@ -30,6 +31,10 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -299,11 +304,29 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     public final void set(String path, Object value) {
         getConfig().set(path, value);
     }
+
     public final Optional<CustomItem> getItem(String id) {
         CustomItem item = customItems.get(id);
         if(item == null)
             return Optional.empty();
         return Optional.of(item);
+    }
+
+    public final Optional<CustomItem> getItem(ItemStack stack) {
+        if (stack == null) return Optional.empty();
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null) return Optional.empty();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        Optional<Pair<String, Byte>> data = PDCUtils.get(container, PersistentDataType.BYTE);
+        if (data.isEmpty()) return Optional.empty();
+
+        return getItem(data.get().getFirst());
+    }
+
+    public final void registerItem(CustomItem item) {
+        if (item == null)
+            throw new IllegalStateException("Item must not be null!");
+        this.customItems.put(item.getId(), item);
     }
 
     public final List<CustomItem> getItems() {
@@ -326,10 +349,8 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
         return this.createItem(this);
     }
 
-    public final void registerItem(CustomItem item) {
-        if (item == null)
-            throw new IllegalStateException("Item must not be null!");
-        this.customItems.put(item.getId(), item);
+    public final boolean isInstalled(String id) {
+        return Bukkit.getPluginManager().getPlugin(id) != null;
     }
 
     public static SMPPlugin getById(String id) {
@@ -502,6 +523,7 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
                 return null;
             }
         }
+
 
         return generic;
     }

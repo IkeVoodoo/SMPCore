@@ -19,13 +19,17 @@ public class HealthUtils {
     public static double get(LivingEntity entity) {
         AttributeInstance maxHealth = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if (maxHealth != null)
-            return maxHealth.getValue();
+            return maxHealth.getBaseValue();
         return 20;
     }
 
-    public static boolean setIfWithin(double amount, double min, double max, LivingEntity entity) {
-        if(amount > min && amount <= max) {
+    public static boolean setIfWithin(double amount, double min, double max, LivingEntity entity, boolean useDef, double def) {
+        if(amount >= min && amount <= max) {
             set(amount, entity);
+            return true;
+        }
+        if (useDef) {
+            set(def, entity);
             return true;
         }
         return false;
@@ -40,11 +44,19 @@ public class HealthUtils {
     }
 
     public static boolean increaseIfUnder(double amount, double max, LivingEntity entity) {
-        return setIfWithin(get(entity) + amount, 0, max, entity);
+        return increaseIfUnder(amount, max, entity, false);
     }
 
     public static boolean decreaseIfOver(double amount, double min, LivingEntity entity) {
-        return setIfWithin(get(entity) - amount, min, 2048, entity);
+        return decreaseIfOver(amount, min, entity, false);
+    }
+
+    public static boolean increaseIfUnder(double amount, double max, LivingEntity entity, boolean setToMax) {
+        return setIfWithin(get(entity) + amount, 0, max, entity, setToMax, max);
+    }
+
+    public static boolean decreaseIfOver(double amount, double min, LivingEntity entity, boolean setToMin) {
+        return setIfWithin(get(entity) - amount, min, 2048, entity, setToMin, min);
     }
 
     public static void heal(LivingEntity entity, double amount) {

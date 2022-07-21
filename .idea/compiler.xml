@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="SMPCore" target="17" />
+      <module name="SMPCore" target="16" />
     </bytecodeTargetLevel>
   </component>
 </project>

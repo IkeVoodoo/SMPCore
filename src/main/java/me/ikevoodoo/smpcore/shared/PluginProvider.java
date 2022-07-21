@@ -1,7 +1,6 @@
 package me.ikevoodoo.smpcore.shared;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
-import me.ikevoodoo.smpcore.annotations.NoInject;
 import me.ikevoodoo.smpcore.config.ConfigData;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;

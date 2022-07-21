@@ -2,10 +2,11 @@ package me.ikevoodoo.smpcore.recipes;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.RecipeChoice;
 
 import java.util.Arrays;
 
-public record RecipeData(Recipe recipe, Material... materials) {
+public record RecipeData(Recipe recipe, Material[] materials, RecipeChoice... choices) {
 
     @Override
     public boolean equals(Object obj) {

@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -53,6 +54,7 @@ public abstract class CustomItem {
     private final SMPPlugin plugin;
 
     private boolean enabled = true;
+    private File recipeFIle;
 
     protected CustomItem(SMPPlugin plugin, String id, Message friendlyName) {
         this.plugin = plugin;
@@ -80,6 +82,24 @@ public abstract class CustomItem {
         return this.enabled;
     }
 
+    public final CustomItem setRecipeFile(File recipeFIle) {
+        this.recipeFIle = recipeFIle;
+        return this;
+    }
+
+    public final CustomItem setRecipeFile(String name) {
+        this.recipeFIle = getPlugin().getConfigHandler().getFile(name);
+        return this;
+    }
+
+    public final File getRecipeFile() {
+        return this.recipeFIle;
+    }
+
+    public final boolean hasRecipeFile() {
+        return this.recipeFIle != null;
+    }
+
     public final ItemStack getItemStack() {
         ItemStack itemStack = createItem(null);
         if(itemStack == null)
@@ -90,6 +110,8 @@ public abstract class CustomItem {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         for (NamespacedKey key : keys)
             container.set(key, PersistentDataType.INTEGER, 0);
+
+        container.set(makeKey(getId()), PersistentDataType.BYTE, (byte) 0);
 
         String displayName = data.displayName.get();
         if(displayName != null && !displayName.isBlank())
@@ -112,6 +134,27 @@ public abstract class CustomItem {
 
     public final ItemStack getItemStack(int amount) {
         ItemStack itemStack = getItemStack();
+        if(itemStack == null)
+            return null;
+
+        itemStack.setAmount(amount);
+        return itemStack;
+    }
+
+    public final ItemStack getCleanStack() {
+        ItemStack stack = getItemStack();
+        if (stack == null) return null;
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null) return null;
+
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.remove(makeKey(getId()));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public final ItemStack getCleanStack(int amount) {
+        ItemStack itemStack = getCleanStack();
         if(itemStack == null)
             return null;
 
@@ -209,7 +252,14 @@ public abstract class CustomItem {
     }
 
     public RecipeData createRecipeData() {
-        return null;
+        if (!hasRecipeFile()) return null;
+        return getPlugin().getRecipeLoader().getRecipe(
+                getPlugin().getConfigHandler().getYmlConfig(getRecipeFile().getName()),
+                "recipe",
+                getItemStack(),
+                makeKey(this.getId() + "_recipe"),
+                getRecipeOptions()
+        );
     }
 
     public final void reload() {
@@ -282,6 +332,11 @@ public abstract class CustomItem {
 
     public final SMPPlugin getPlugin() {
         return plugin;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Item '%s'", this.getId());
     }
 
     private void clearConsumers() {

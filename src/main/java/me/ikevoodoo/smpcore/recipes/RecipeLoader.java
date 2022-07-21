@@ -1,12 +1,14 @@
 package me.ikevoodoo.smpcore.recipes;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.utils.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class RecipeLoader {
@@ -45,6 +48,16 @@ public class RecipeLoader {
                 .replace(":", "");
     }
 
+    private String toReadable(RecipeChoice choice) {
+        if (choice instanceof RecipeChoice.ExactChoice exact)
+            return toReadable(exact.getItemStack().getType());
+
+        if (choice instanceof RecipeChoice.MaterialChoice mat)
+            return toReadable(mat.getChoices().get(0));
+
+        return "CONVERSION_ERROR";
+    }
+
     private Material fromString(String mat) {
         return Material.getMaterial(fix(mat));
     }
@@ -57,51 +70,76 @@ public class RecipeLoader {
      *     item: item id
      *
      * */
-    private Material[] getMaterials(ConfigurationSection config, String path) {
-        Material[] materials = Arrays.stream(new Material[9]).map(m -> Material.AIR).toArray(Material[]::new);
+    private RecipeChoice[] getChoices(ConfigurationSection config, String path) {
+        RecipeChoice[] choices = Arrays.stream(new RecipeChoice[9]).map(m -> new RecipeChoice.MaterialChoice(Material.AIR)).toArray(RecipeChoice[]::new);
 
-        if(!config.isConfigurationSection(path)) {
-            return materials;
-        }
+        if(!config.isConfigurationSection(path))
+            return choices;
 
         ConfigurationSection section = config.getConfigurationSection(path);
-        if (section == null) return materials;
+        if (section == null) return choices;
         for(String key : section.getKeys(false)) {
             Material mat = Material.AIR;
             String matName = config.getString(path + "." + key + ".item");
             if(matName == null)
                 continue;
+
+            String name = StringUtils.toEnumCompatible(matName);
+
+            int index = Integer.parseInt(key);
+
+            Optional<CustomItem> itemOptional = plugin.getItem(name.toLowerCase(Locale.ROOT));
+            if (itemOptional.isPresent()) {
+                CustomItem item = itemOptional.get();
+                ItemStack stack = item.getItemStack();
+                if (stack == null) continue;
+                if(index > 0 && index <= choices.length) choices[index - 1] = new RecipeChoice.ExactChoice(stack);
+                else choices[Math.min(index, choices.length - 1)] = new RecipeChoice.ExactChoice(stack);
+                continue;
+            }
+
             try {
-                mat = Material.valueOf(fix(matName));
+                mat = Material.valueOf(fix(name));
             } catch (IllegalArgumentException e) {
                 plugin.getLogger().log(Level.SEVERE, "Invalid material: {0}", matName);
             }
-            int index = Integer.parseInt(key);
-            if(index > 0 && index <= materials.length) materials[index - 1] = mat;
-            else materials[index] = mat;
+            if(index > 0 && index <= choices.length) choices[index - 1] = new RecipeChoice.MaterialChoice(mat);
+            else choices[Math.min(index, choices.length - 1)] = new RecipeChoice.MaterialChoice(mat);
         }
 
-        for (int i = 0; i < materials.length; i++) {
-            config.set(path + "." + (i + 1) + ".item", toReadable(materials[i]));
+        for (int i = 0; i < choices.length; i++) {
+            config.set(path + "." + (i + 1) + ".item", toReadable(choices[i]));
         }
 
-        return materials;
+        return choices;
+    }
+
+    public Material[] getMats(RecipeChoice[] choices) {
+        return Arrays.stream(choices).map(choice -> {
+            if (choice instanceof RecipeChoice.ExactChoice exact)
+                return exact.getItemStack().getType();
+
+            if (choice instanceof RecipeChoice.MaterialChoice mat)
+                return mat.getChoices().get(0);
+
+            return Material.AIR;
+        }).toArray(Material[]::new);
     }
 
     public RecipeData getRecipe(ConfigurationSection config, String path, ItemStack output, NamespacedKey key, boolean shaped) {
-        Material[] materials = getMaterials(config, path);
+        RecipeChoice[] choices = getChoices(config, path);
         if(shaped) {
             ShapedRecipe recipe = new ShapedRecipe(key, output);
             recipe.shape("012", "345", "678");
-            for(int i = 0; i < materials.length; i++)
-                recipe.setIngredient((i + "").charAt(0), materials[i]);
-            return new RecipeData(recipe, materials);
+            for(int i = 0; i < choices.length; i++)
+                recipe.setIngredient((i + "").charAt(0), choices[i]);
+            return new RecipeData(recipe, getMats(choices), choices);
         }
 
         ShapelessRecipe recipe = new ShapelessRecipe(key, output);
-        for(Material mat : materials)
-            recipe.addIngredient(mat);
-        return new RecipeData(recipe, materials);
+        for(RecipeChoice choice : choices)
+            recipe.addIngredient(choice);
+        return new RecipeData(recipe, getMats(choices), choices);
     }
 
     public RecipeData getRecipe(String path, ItemStack output, NamespacedKey key, boolean shaped) {
@@ -127,10 +165,9 @@ public class RecipeLoader {
 
     public void writeRecipe(File file, RecipeData recipe) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        Material[] materials = recipe.materials();
-        for(int i = 0; i < materials.length; i++) {
-            config.set("recipe." + (i + 1) + ".item", toReadable(materials[i]));
-        }
+        RecipeChoice[] choices = recipe.choices();
+        for(int i = 0; i < choices.length; i++)
+            config.set("recipe." + (i + 1) + ".item", toReadable(choices[i]));
         config.set("options.item", toReadable(recipe.recipe().getResult().getType()));
         config.set("options.shaped", recipe.recipe() instanceof ShapedRecipe);
         config.set("options.outputAmount", recipe.recipe().getResult().getAmount());
