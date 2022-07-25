@@ -6,4 +6,6 @@ public enum CommandReturn {
     EXECUTE_AS_SENDER,
     EXECUTE,
 
+    IGNORE
+
 }

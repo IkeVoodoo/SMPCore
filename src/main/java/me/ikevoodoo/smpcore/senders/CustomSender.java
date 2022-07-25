@@ -19,24 +19,25 @@ public class CustomSender {
     private CommandSender sender;
     private boolean log;
 
-    public CustomSender console() {
-        this.sender = Bukkit.getConsoleSender();
+    public CustomSender sender(CommandSender sender) {
+        this.sender = sender;
         return this;
+    }
+
+    public CustomSender console() {
+        return this.sender(Bukkit.getConsoleSender());
     }
 
     public CustomSender player(Player player) {
-        this.sender = player;
-        return this;
+        return this.sender(player);
     }
 
     public CustomSender player(String player) {
-        this.sender = Bukkit.getPlayer(player);
-        return this;
+        return this.player(Bukkit.getPlayer(player));
     }
 
     public CustomSender player(UUID uuid) {
-        this.sender = Bukkit.getPlayer(uuid);
-        return this;
+        return this.player(Bukkit.getPlayer(uuid));
     }
 
     public CustomSender log() {

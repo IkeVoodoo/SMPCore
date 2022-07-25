@@ -16,6 +16,8 @@ me\ikevoodoo\smpcore\utils\CommandUtils$1.class
 me\ikevoodoo\smpcore\config\annotations\LongDefault.class
 me\ikevoodoo\smpcore\listeners\ChatMessageListener.class
 me\ikevoodoo\smpcore\config\annotations\BooleanDefault.class
+me\ikevoodoo\smpcore\config\lang\ConfigStructure.class
+me\ikevoodoo\smpcore\utils\ClassUtils.class
 me\ikevoodoo\smpcore\security\CodeGenerator.class
 me\ikevoodoo\smpcore\annotations\Property.class
 me\ikevoodoo\smpcore\menus\MenuHolder.class
@@ -94,6 +96,7 @@ me\ikevoodoo\smpcore\commands\arguments\parsers\UUIDParser.class
 me\ikevoodoo\smpcore\config\annotations\IntDefault.class
 me\ikevoodoo\smpcore\shared\PluginProvider.class
 me\ikevoodoo\smpcore\utils\HashUtils.class
+me\ikevoodoo\smpcore\config\lang\ConfigLang.class
 me\ikevoodoo\smpcore\players\FakeCommandSender.class
 me\ikevoodoo\smpcore\functional\loop\FunctionalLoop.class
 me\ikevoodoo\smpcore\menus\functional\MenuCreator.class
@@ -116,6 +119,7 @@ me\ikevoodoo\smpcore\items\ItemClickState.class
 me\ikevoodoo\smpcore\listeners\PlayerConnectListener.class
 me\ikevoodoo\smpcore\listeners\PlayerPlaceListener.class
 me\ikevoodoo\smpcore\particles\PolygonParticleRenderer.class
+me\ikevoodoo\smpcore\config\lang\ConfigStructure$1.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderHandler.class
 me\ikevoodoo\smpcore\annotations\NoInject.class
 me\ikevoodoo\smpcore\listeners\InventoryEditListener.class

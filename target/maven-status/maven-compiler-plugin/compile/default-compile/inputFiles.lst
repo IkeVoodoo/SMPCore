@@ -51,6 +51,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\comma
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\items\functional\FunctionalItem.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\texture\ResourcePackData.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\world\WorldHelper.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\ClassUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\senders\CustomSender.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\annotations\Property.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\ExceptionUtils.java
@@ -64,6 +65,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\text\
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\StringParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\recipes\RecipeOptions.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\Menu.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\lang\ConfigStructure.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\functions\CatchFunction.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\DoubleParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\functional\CommandCreator.java
@@ -86,6 +88,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\sende
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\PlayerDamageListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\players\FakePlayerMessageHandler.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderBuilder.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\config\lang\ConfigLang.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\InventoryEditListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\MenuPage.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\PageData.java

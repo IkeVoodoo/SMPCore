@@ -69,6 +69,12 @@ public class StringUtils {
                 .replaceAll("\\s+$", "");
     }
 
+    public static String removeTrailingZeros(String string) {
+        return string.indexOf('.') > 0
+                ? string.replaceAll("0*$", "").replaceAll("\\.$", "")
+                : string;
+    }
+
     public static String slice(String input, int start, int end) {
         int endIndex = end < 0 ? input.length() + end : end;
         if(endIndex > input.length())
