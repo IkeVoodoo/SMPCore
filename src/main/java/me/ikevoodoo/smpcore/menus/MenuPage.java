@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class MenuPage {
 
@@ -17,6 +18,8 @@ public class MenuPage {
     private final List<Consumer<Player>> openListeners = new ArrayList<>();
     private final Menu menu;
     private PageData data;
+
+    private boolean allowItemActivation = true;
 
     protected MenuPage(PageData data, Menu menu) {
         this.data = data;
@@ -36,6 +39,14 @@ public class MenuPage {
 
     public void data(PageData data) {
         this.data = data;
+    }
+
+    public boolean allowItemActivation() {
+        return this.allowItemActivation;
+    }
+
+    public void allowItemActivation(boolean allow) {
+        this.allowItemActivation = allow;
     }
 
     public Optional<ItemStack> item(int slot) {
@@ -61,6 +72,26 @@ public class MenuPage {
         for (ItemData data : datas) {
             inv.setItem(getSlot(inv, data), data.stack());
         }
+    }
+
+    public List<ItemData> items() {
+        return this.stacks
+                .entrySet()
+                .stream()
+                .map(entry -> ItemData.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<ItemData> items(Player player) {
+        Inventory inv = this.inventories.get(player.getUniqueId());
+        if (inv == null) return new ArrayList<>();
+        List<ItemData> datas = new ArrayList<>();
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack == null) continue;
+            datas.add(ItemData.of(i, stack));
+        }
+        return datas;
     }
 
     public void fill(ItemStack stack) {

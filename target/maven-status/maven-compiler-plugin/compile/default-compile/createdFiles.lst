@@ -10,13 +10,13 @@ me\ikevoodoo\smpcore\particles\ParticleRendererBase.class
 me\ikevoodoo\smpcore\players\FakePlayer.class
 me\ikevoodoo\smpcore\events\PlayerPreDeathEvent.class
 me\ikevoodoo\smpcore\world\WorldHelper.class
+me\ikevoodoo\smpcore\utils\HealthUtils$SetResult.class
 me\ikevoodoo\smpcore\functional\loop\FunctionalLoopBase.class
 me\ikevoodoo\smpcore\text\messaging\MessageComponent.class
 me\ikevoodoo\smpcore\utils\CommandUtils$1.class
 me\ikevoodoo\smpcore\config\annotations\LongDefault.class
 me\ikevoodoo\smpcore\listeners\ChatMessageListener.class
 me\ikevoodoo\smpcore\config\annotations\BooleanDefault.class
-me\ikevoodoo\smpcore\config\lang\ConfigStructure.class
 me\ikevoodoo\smpcore\utils\ClassUtils.class
 me\ikevoodoo\smpcore\security\CodeGenerator.class
 me\ikevoodoo\smpcore\annotations\Property.class
@@ -55,6 +55,7 @@ me\ikevoodoo\smpcore\commands\arguments\parsers\StringParser.class
 me\ikevoodoo\smpcore\menus\PageData.class
 me\ikevoodoo\smpcore\events\MenuEvent.class
 me\ikevoodoo\smpcore\menus\MenuPage.class
+me\ikevoodoo\smpcore\recipes\RecipeReplacement.class
 me\ikevoodoo\smpcore\utils\ExceptionUtils.class
 me\ikevoodoo\smpcore\handlers\chat\ChatInputHandler.class
 me\ikevoodoo\smpcore\callbacks\eliminations\EliminationType.class
@@ -72,9 +73,11 @@ me\ikevoodoo\smpcore\utils\FileUtils.class
 me\ikevoodoo\smpcore\math\helper\LineHelper.class
 me\ikevoodoo\smpcore\utils\ItemUtils.class
 me\ikevoodoo\smpcore\callbacks\chat\ChatTransactionListener.class
+me\ikevoodoo\smpcore\items\CustomItem$1.class
 me\ikevoodoo\smpcore\math\helper\PositionHelper.class
 me\ikevoodoo\smpcore\commands\arguments\Arguments.class
 me\ikevoodoo\smpcore\listeners\PlayerSleepListener.class
+me\ikevoodoo\smpcore\items\ItemEntity.class
 me\ikevoodoo\smpcore\reflection\NMSReflectionHelper.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderBuilder$1.class
 me\ikevoodoo\smpcore\reflection\ClassData.class
@@ -94,9 +97,9 @@ me\ikevoodoo\smpcore\handlers\ResourcePackHandler.class
 me\ikevoodoo\smpcore\config\annotations\StringDefault.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\UUIDParser.class
 me\ikevoodoo\smpcore\config\annotations\IntDefault.class
+me\ikevoodoo\smpcore\colors\GradientGenerator.class
 me\ikevoodoo\smpcore\shared\PluginProvider.class
 me\ikevoodoo\smpcore\utils\HashUtils.class
-me\ikevoodoo\smpcore\config\lang\ConfigLang.class
 me\ikevoodoo\smpcore\players\FakeCommandSender.class
 me\ikevoodoo\smpcore\functional\loop\FunctionalLoop.class
 me\ikevoodoo\smpcore\menus\functional\MenuCreator.class
@@ -108,6 +111,7 @@ me\ikevoodoo\smpcore\events\TotemCheckEvent.class
 me\ikevoodoo\smpcore\items\CustomItem$CustomItemData.class
 me\ikevoodoo\smpcore\menus\functional\FunctionalMenu.class
 me\ikevoodoo\smpcore\SMPPlugin.class
+me\ikevoodoo\smpcore\utils\Lazy.class
 me\ikevoodoo\smpcore\config\ConfigHelper.class
 me\ikevoodoo\smpcore\config\annotations\Config.class
 me\ikevoodoo\smpcore\reflection\Test.class
@@ -119,7 +123,6 @@ me\ikevoodoo\smpcore\items\ItemClickState.class
 me\ikevoodoo\smpcore\listeners\PlayerConnectListener.class
 me\ikevoodoo\smpcore\listeners\PlayerPlaceListener.class
 me\ikevoodoo\smpcore\particles\PolygonParticleRenderer.class
-me\ikevoodoo\smpcore\config\lang\ConfigStructure$1.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderHandler.class
 me\ikevoodoo\smpcore\annotations\NoInject.class
 me\ikevoodoo\smpcore\listeners\InventoryEditListener.class
@@ -127,11 +130,13 @@ me\ikevoodoo\smpcore\events\MenuPageOpenEvent.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\FloatParser.class
 me\ikevoodoo\smpcore\fileserver\FileServerRequest.class
 me\ikevoodoo\smpcore\handlers\MenuHandler.class
+me\ikevoodoo\smpcore\utils\ServerUtils.class
 me\ikevoodoo\smpcore\commands\functional\FunctionalCommand.class
 me\ikevoodoo\smpcore\utils\Pair.class
 me\ikevoodoo\smpcore\text\messaging\MessageProperty.class
 me\ikevoodoo\smpcore\commands\SMPCommand.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderBuilder.class
+me\ikevoodoo\smpcore\helpers\StringHelper.class
 me\ikevoodoo\smpcore\listeners\PlayerUseListener.class
 me\ikevoodoo\smpcore\utils\random\MaterialUtils.class
 me\ikevoodoo\smpcore\particles\ParticleInfo.class

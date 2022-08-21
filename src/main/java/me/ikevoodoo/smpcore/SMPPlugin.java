@@ -17,10 +17,12 @@ import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.items.functional.FunctionalItem;
 import me.ikevoodoo.smpcore.items.functional.ItemCreator;
 import me.ikevoodoo.smpcore.listeners.*;
+import me.ikevoodoo.smpcore.menus.Menu;
 import me.ikevoodoo.smpcore.menus.functional.FunctionalMenu;
 import me.ikevoodoo.smpcore.menus.functional.MenuCreator;
 import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.CommandUtils;
+import me.ikevoodoo.smpcore.utils.FileUtils;
 import me.ikevoodoo.smpcore.utils.PDCUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
@@ -87,6 +89,13 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
         //createDataFolder();
         //loadJoinHandler();
         eliminationHandler = new EliminationHandler(this);
+
+        try {
+            eliminationHandler.load(FileUtils.getOrCreate(getDataFolder(), "data", "cache.bin"));
+        } catch (IOException e) {
+            getLogger().severe("Could not load cache data!");
+        }
+
         joinActionHandler = new JoinActionHandler(this);
         inventoryActionHandler = new InventoryActionHandler(this);
         resourcePackHandler = new ResourcePackHandler(this);
@@ -120,6 +129,12 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     @Override
     public final void onDisable() {
         //saveJoinHandler();
+        try {
+            eliminationHandler.save(FileUtils.getOrCreate(getDataFolder(), "data", "cache.bin"));
+        } catch (IOException e) {
+            getLogger().severe("Could not save cache data!");
+        }
+
         whenDisabled();
     }
 
@@ -348,6 +363,32 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     public final FunctionalItem createItem() {
         return this.createItem(this);
     }
+
+    public final void destroyMenu(String id) {
+        this.menuHandler.remove(makeKey(id));
+    }
+
+    public final void destroyMenu(NamespacedKey key) {
+        this.menuHandler.remove(key);
+    }
+
+    public final void destroyMenu(Menu menu) {
+        this.menuHandler.remove(menu.id());
+        this.playerUseListener.removeListener(menu.id());
+    }
+
+    public final void destroyItem(String id) {
+        this.customItems.remove(id);
+    }
+
+    public final void destroyItem(NamespacedKey key) {
+        this.destroyItem(key.getKey());
+    }
+
+    public final void destroyItem(CustomItem item) {
+        this.destroyItem(item.getId());
+    }
+
 
     public final boolean isInstalled(String id) {
         return Bukkit.getPluginManager().getPlugin(id) != null;

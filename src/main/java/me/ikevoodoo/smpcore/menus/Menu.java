@@ -53,6 +53,10 @@ public class Menu extends MenuHolder {
         return Optional.ofNullable(this.pages.get(page));
     }
 
+    public Optional<MenuPage> page(Player player) {
+        return this.page(this.viewingPage.get(player.getUniqueId()));
+    }
+
     public void open(Player player) {
         if (this.pages.isEmpty()) return;
         closePage(player);

@@ -163,11 +163,14 @@ public class RecipeLoader {
         return getOptions(plugin.getConfig().getConfigurationSection(path));
     }
 
-    public void writeRecipe(File file, RecipeData recipe) {
+    public void writeRecipe(File file, RecipeData recipe, RecipeReplacement... replacements) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         RecipeChoice[] choices = recipe.choices();
-        for(int i = 0; i < choices.length; i++)
-            config.set("recipe." + (i + 1) + ".item", toReadable(choices[i]));
+        for(int i = 0; i < choices.length; i++) {
+            String key = String.valueOf(i + 1);
+            Optional<Object> replacement = getReplacement(key, replacements);
+            config.set("recipe." + key + ".item", replacement.orElse(toReadable(choices[i])));
+        }
         config.set("options.item", toReadable(recipe.recipe().getResult().getType()));
         config.set("options.shaped", recipe.recipe() instanceof ShapedRecipe);
         config.set("options.outputAmount", recipe.recipe().getResult().getAmount());
@@ -176,6 +179,14 @@ public class RecipeLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private Optional<Object> getReplacement(String key, RecipeReplacement... replacements) {
+        for(RecipeReplacement replacement : replacements) {
+            if(replacement.key().equals(key))
+                return Optional.ofNullable(replacement.value());
+        }
+        return Optional.empty();
     }
 
 

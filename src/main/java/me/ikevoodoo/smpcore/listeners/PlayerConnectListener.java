@@ -2,6 +2,7 @@ package me.ikevoodoo.smpcore.listeners;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.handlers.EliminationHandler;
+import org.bukkit.EntityEffect;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,6 +28,7 @@ public class PlayerConnectListener implements Listener {
         plugin.getJoinActionHandler().fire(e.getPlayer().getUniqueId());
         plugin.getJoinActionHandler().fire(e.getPlayer());
 
+
         EliminationHandler handler = plugin.getEliminationHandler();
         if(handler.isEliminated(e.getPlayer())) {
             long banTime = handler.getBanTime(e.getPlayer());
@@ -36,6 +38,7 @@ public class PlayerConnectListener implements Listener {
                 e.setJoinMessage("");
                 removeQuitMessage.add(e.getPlayer().getUniqueId());
                 e.getPlayer().kickPlayer("§cYou have been eliminated.");
+                handler.markEliminated(e.getPlayer().getUniqueId(), banTime);
                 return;
             }
 
@@ -45,8 +48,7 @@ public class PlayerConnectListener implements Listener {
 
     @EventHandler
     public void on(PlayerQuitEvent e) {
-        if (removeQuitMessage.contains(e.getPlayer().getUniqueId())) {
-            removeQuitMessage.remove(e.getPlayer().getUniqueId());
+        if (removeQuitMessage.remove(e.getPlayer().getUniqueId())) {
             e.setQuitMessage("");
         }
     }

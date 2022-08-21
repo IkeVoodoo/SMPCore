@@ -1,6 +1,7 @@
 package me.ikevoodoo.smpcore.utils;
 
 import java.io.File;
+import java.io.IOException;
 
 public class FileUtils {
 
@@ -23,6 +24,19 @@ public class FileUtils {
         }
         if (!file.delete())
             result = false;
+        return result;
+    }
+
+    public static File get(File file, String... paths) {
+        return new File(file, String.join(File.separator, paths));
+    }
+
+    public static File getOrCreate(File file, String... paths) throws IOException {
+        File result = get(file, paths);
+        if (!result.exists()) {
+            result.getParentFile().mkdirs();
+            result.createNewFile();
+        }
         return result;
     }
 

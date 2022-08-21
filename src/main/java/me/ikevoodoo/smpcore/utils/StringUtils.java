@@ -1,6 +1,7 @@
 package me.ikevoodoo.smpcore.utils;
 
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalQueries;
 import java.util.ArrayList;
@@ -91,17 +92,78 @@ public class StringUtils {
     }
 
     public static long parseBanTime(String timeString) {
-        var time = DateTimeFormatter.ofPattern("HH:mm:ss.SSSS").parse(timeString).query(TemporalQueries.localTime());
-        // time's hours in milliseconds
-        // time's minutes in milliseconds
-        // time's seconds in milliseconds
-        // time's milliseconds
-        // time's nanoseconds in milliseconds
-        long hours = time.getHour()                               * 60L * 60L * 1000L;
-        long minutes = time.getMinute()                           * 60L * 1000L;
-        long seconds = time.getSecond()                           * 1000L;
-        long milliseconds = time.get(ChronoField.MILLI_OF_SECOND) * 1000L;
-        return hours + minutes + seconds + milliseconds;
+        return DateTimeFormatter
+                .ofPattern("HH:mm:ss.SSSS", Locale.ROOT)
+                .parse(timeString, TemporalQueries.localTime())
+                .getLong(ChronoField.MILLI_OF_DAY);
+    }
+
+    public static String formatTime(long end) {
+        if (end == Long.MAX_VALUE)
+            return "Infinity";
+
+        long time = end - System.currentTimeMillis();
+
+        long seconds = (time / 1000) % 60;
+        long minutes = (time / (1000 * 60)) % 60;
+        long hours = (time / (1000 * 60 * 60)) % 24;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        if (hours > 0) {
+            stringBuilder.append(fixedNumberLength(hours, 2)).append(" hours, ");
+            if (minutes == 0) {
+                stringBuilder.append("00 minutes, ");
+                if (seconds == 0) {
+                    stringBuilder.append("00 seconds");
+                }
+            }
+        }
+
+        if (minutes > 0) {
+            stringBuilder.append(fixedNumberLength(minutes, 2)).append(" minutes, ");
+            if (seconds == 0) {
+                stringBuilder.append("00 seconds");
+            }
+        }
+
+        if (seconds > 0)
+            stringBuilder.append(fixedNumberLength(seconds, 2)).append(" seconds");
+
+        if (stringBuilder.length() == 0)
+            stringBuilder.append("now");
+        return stringBuilder.toString();
+    }
+
+    public static String fixedNumberLength(long number, int length) {
+        String numString = String.valueOf(number);
+        if (numString.length() < length) {
+            return "0".repeat(length - numString.length()) + numString;
+        }
+        return numString;
+    }
+
+    // https://stackoverflow.com/a/332101/13050697
+    public static String toHexString(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+
+        for (byte aByte : bytes) {
+            String hex = Integer.toHexString(0xFF & aByte);
+            if (hex.length() == 1)
+                hexString.append('0');
+            hexString.append(hex);
+        }
+
+        return hexString.toString();
+    }
+
+    public static byte[] fromHexString(String hexString) {
+        int len = hexString.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    + Character.digit(hexString.charAt(i+1), 16));
+        }
+        return data;
     }
 
 }

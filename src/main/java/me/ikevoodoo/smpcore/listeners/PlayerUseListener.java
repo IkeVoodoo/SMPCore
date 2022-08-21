@@ -19,19 +19,19 @@ public class PlayerUseListener extends CallbackListener<PlayerUseItemCallback> {
         super(plugin);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(PlayerInteractEvent event) {
         boolean handled = handle(event.getItem(), event.getPlayer(), event.getAction());
         if (handled) event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(PlayerInteractAtEntityEvent event) {
         boolean handled = handle(event.getPlayer().getInventory().getItemInMainHand(), event.getPlayer(), null);
         if (handled) event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(PlayerInteractEntityEvent event) {
         boolean handled = handle(event.getPlayer().getInventory().getItemInMainHand(), event.getPlayer(), null);
         if (handled) event.setCancelled(true);
@@ -40,6 +40,7 @@ public class PlayerUseListener extends CallbackListener<PlayerUseItemCallback> {
     private boolean handle(ItemStack item, Player player, Action action) {
         PlayerUseItemCallback callback = getCallback(item);
         if (callback == null) return false;
+        if (!callback.allowedActions().contains(action)) return false;
         return callback.useItem(player, item, action);
     }
 }

@@ -53,4 +53,12 @@ public abstract class CallbackListener<T extends Callback> implements Listener {
         callbacks.put(key, callback);
     }
 
+    public void removeListener(String key) {
+        removeListener(new NamespacedKey(plugin, key));
+    }
+
+    public void removeListener(NamespacedKey key) {
+        callbacks.remove(key);
+    }
+
 }

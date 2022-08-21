@@ -1,9 +1,10 @@
 package me.ikevoodoo.smpcore.listeners;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.events.MenuEvent;
 import me.ikevoodoo.smpcore.items.ItemClickResult;
 import me.ikevoodoo.smpcore.menus.Menu;
-import me.ikevoodoo.smpcore.events.MenuEvent;
+import me.ikevoodoo.smpcore.menus.MenuPage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,18 +21,25 @@ public class MenuUpdateListener extends SMPListener {
     @EventHandler
     public void on(InventoryClickEvent event) {
         if(!(event.getWhoClicked() instanceof Player player)) return;
+
+        if (event.getView().getBottomInventory() == event.getClickedInventory()) return;
+
         Menu menu = getPlugin().getMenuHandler().get(player);
         if (menu != null) {
+            MenuPage page = menu.page(player).orElseThrow();
+
             ItemStack item = event.getCurrentItem();
             if(item == null || item.getType().isAir())
-                item = event.getCursor();
-            ItemStack finalItem = item;
+                return;
+
             getPlugin().getItem(item).ifPresentOrElse(custom -> {
+                if (!page.allowItemActivation()) return;
+
                 ItemClickResult result = custom.tryClick(player, event.getCurrentItem(), null);
                 if (result.shouldCancel())
                     event.setCancelled(true);
             }, () -> {
-                MenuEvent e = new MenuEvent(menu, event.getSlot(), finalItem, player);
+                MenuEvent e = new MenuEvent(menu, event.getSlot(), item, player);
                 Bukkit.getPluginManager().callEvent(e);
                 if (e.isCancelled())
                     event.setCancelled(true);

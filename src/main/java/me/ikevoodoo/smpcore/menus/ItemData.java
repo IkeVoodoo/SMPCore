@@ -12,7 +12,7 @@ public class ItemData {
         this.stack = stack;
     }
 
-    protected int slot() {
+    public int slot() {
         return this.slot;
     }
 
@@ -22,6 +22,10 @@ public class ItemData {
 
     public static ItemData of(int slot, ItemStack stack) {
         return new ItemData(slot, stack);
+    }
+
+    public ItemStack getStack() {
+        return this.stack.clone();
     }
 
 }

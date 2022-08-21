@@ -22,7 +22,7 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
 
     private String id;
     private Message friendlyName;
-    private Supplier<Material> material;
+    private Supplier<ItemStack> item;
     private Supplier<Message> name;
 
     private final List<Supplier<Message>> loreSuppliers = new ArrayList<>();
@@ -43,7 +43,12 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
     }
 
     public FunctionalItem material(Supplier<Material> material) {
-        this.material = material;
+        this.item = () -> new ItemStack(material.get());
+        return this;
+    }
+
+    public FunctionalItem item(Supplier<ItemStack> material) {
+        this.item = material;
         return this;
     }
 
@@ -80,7 +85,8 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
         CustomItem item = new CustomItem(getPlugin(), this.id, this.friendlyName) {
             @Override
             public ItemStack createItem(Player player) {
-                ItemStack stack = new ItemStack(material != null ? material.get() : Material.STONE);
+                ItemStack stack = FunctionalItem.this.item.get();
+                if (stack == null) stack = new ItemStack(Material.STONE);
                 ItemMeta meta = stack.getItemMeta();
                 if (name != null && meta != null)
                     meta.setDisplayName(name.get().text());

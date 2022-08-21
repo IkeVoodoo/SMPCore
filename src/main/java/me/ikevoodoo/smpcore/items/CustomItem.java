@@ -1,10 +1,12 @@
 package me.ikevoodoo.smpcore.items;
 
 import me.ikevoodoo.smpcore.SMPPlugin;
+import me.ikevoodoo.smpcore.callbacks.items.PlayerUseItemCallback;
 import me.ikevoodoo.smpcore.functions.SerializableConsumer;
 import me.ikevoodoo.smpcore.recipes.RecipeData;
 import me.ikevoodoo.smpcore.recipes.RecipeOptions;
 import me.ikevoodoo.smpcore.text.messaging.Message;
+import me.ikevoodoo.smpcore.utils.PDCUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -72,6 +74,11 @@ public abstract class CustomItem {
 
     public static void give(Player player, CustomItem customItem) {
         player.getInventory().addItem(customItem.getItemStack());
+    }
+
+    public static void remove(Player player, CustomItem customItem, int amount) {
+        ItemStack item = customItem.getItemStack(amount);
+        player.getInventory().removeItem(item);
     }
 
     public final void setEnabled(boolean enabled) {
@@ -207,17 +214,27 @@ public abstract class CustomItem {
     }
 
     public final CustomItem addKey(String key) {
+        if (key == null)
+            throw new IllegalArgumentException("Key cannot be null");
         NamespacedKey namespacedKey = new NamespacedKey(this.plugin, key);
         keys.add(namespacedKey);
-        this.plugin.onUse(key, (plr, item, action) -> {
-            ItemClickResult result = tryClick(plr, item, action);
-            if(result == null)
-                return true;
+        this.plugin.onUse(key, new PlayerUseItemCallback() {
+            @Override
+            public boolean useItem(Player player, ItemStack item, Action action) {
+                ItemClickResult result = tryClick(player, item, action);
+                if(result == null)
+                    return true;
 
-            if(decreaseOnUse && result.state() == ItemClickState.SUCCESS)
-                item.setAmount(item.getAmount() - 1);
+                if(decreaseOnUse && result.state() == ItemClickState.SUCCESS)
+                    item.setAmount(item.getAmount() - 1);
 
-            return result.cancel();
+                return result.cancel();
+            }
+
+            @Override
+            public List<Action> allowedActions() {
+                return List.of(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK);
+            }
         });
         return this;
     }
