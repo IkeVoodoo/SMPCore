@@ -21,10 +21,7 @@ import me.ikevoodoo.smpcore.menus.Menu;
 import me.ikevoodoo.smpcore.menus.functional.FunctionalMenu;
 import me.ikevoodoo.smpcore.menus.functional.MenuCreator;
 import me.ikevoodoo.smpcore.recipes.RecipeLoader;
-import me.ikevoodoo.smpcore.utils.CommandUtils;
-import me.ikevoodoo.smpcore.utils.FileUtils;
-import me.ikevoodoo.smpcore.utils.PDCUtils;
-import me.ikevoodoo.smpcore.utils.Pair;
+import me.ikevoodoo.smpcore.utils.*;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -73,11 +70,16 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     private MaterialUtils materialUtils;
 
+    private File cacheFolder;
+
+    private String serverIp;
+
     private final CommandSender noLogConsole = createNewSender(as().noLog().console());
 
     private final Random random = new Random();
 
     private final HashMap<String, CustomItem> customItems = new HashMap<>();
+
 
     @Override
     public final void onLoad() {
@@ -123,6 +125,13 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
         }
         configHelper = new ConfigHelper(this);
         materialUtils = new MaterialUtils();
+        try {
+            cacheFolder = FileUtils.getOrCreate(getDataFolder(), "data", "cache");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String ip = Bukkit.getIp();
+        serverIp = ip.isBlank() ? NetworkUtils.getServerIp() : ip;
         whenEnabled();
     }
 
@@ -207,6 +216,14 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     public final MaterialUtils getMaterialUtils() {
         return materialUtils;
+    }
+
+    public final File getCacheFolder() {
+        return cacheFolder;
+    }
+
+    public final String getServerIp() {
+        return serverIp;
     }
 
     public final Random getRandom() {

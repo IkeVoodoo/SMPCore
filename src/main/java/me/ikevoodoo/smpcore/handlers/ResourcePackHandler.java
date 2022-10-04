@@ -3,6 +3,7 @@ package me.ikevoodoo.smpcore.handlers;
 import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.shared.PluginProvider;
 import me.ikevoodoo.smpcore.texture.ResourcePackData;
+import me.ikevoodoo.smpcore.utils.FileUtils;
 import me.ikevoodoo.smpcore.utils.HashUtils;
 import me.ikevoodoo.smpcore.utils.URLUtils;
 import org.bukkit.entity.Player;
@@ -13,7 +14,6 @@ import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @SuppressWarnings("unused")
@@ -26,15 +26,28 @@ public class ResourcePackHandler extends PluginProvider {
         super(plugin);
     }
 
-    public void addResourcePack(String id, String location) throws IOException, NoSuchAlgorithmException {
-        /*File file = new File(location);
-        if(file.exists()) {
-            addResourcePack(id, file);
-            return;
-        }*/
+    public void addResourcePack(String id, String location) {
         byte[] hash = URLUtils.ifValid(location, conn -> HashUtils.sha1Hash(conn.getInputStream()));
         if (hash == null) return;
         resourcePacks.put(id, new ResourcePackData(location, hash));
+    }
+
+    public void adResourcePackFile(String id, File file) throws IOException, NoSuchAlgorithmException {
+        if (!file.exists()) return;
+
+        getPlugin().getCacheFolder().mkdirs();
+
+        File cacheFile = new File(getPlugin().getCacheFolder(), FileUtils.getName(file) + ".zip");
+        if (cacheFile.exists()) {
+            Files.deleteIfExists(cacheFile.toPath());
+            cacheFile.createNewFile();
+        }
+
+        try(ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(cacheFile.toPath()))) {
+            FileUtils.addToZip(file, zip);
+        }
+
+        resourcePackFiles.put(id, new ResourcePackData(cacheFile.getPath(), HashUtils.sha1Hash(Files.newInputStream(cacheFile.toPath()))));
     }
 
     /*public void addResourcePack(String id, File location) throws IOException, NoSuchAlgorithmException {
@@ -74,7 +87,7 @@ public class ResourcePackHandler extends PluginProvider {
     public void applyResourcePackFile(Player player, String id) {
         ResourcePackData data = resourcePackFiles.get(id);
         if (data == null) return;
-        player.setResourcePack(data.location(), data.hash());
+        player.setResourcePack(getPlugin().getServerIp() + ":8989/" + data.location(), data.hash());
     }
 
     public void removeResourcePack(String id) {
@@ -83,30 +96,9 @@ public class ResourcePackHandler extends PluginProvider {
 
     public void reload() throws IOException, NoSuchAlgorithmException {
         HashMap<String, ResourcePackData> newResourcePacks = new HashMap<>(resourcePacks);
-        //HashMap<String, ResourcePackData> newResourcePackFiles = new HashMap<>(resourcePackFiles);
         resourcePacks.clear();
-        //resourcePackFiles.clear();
         for (Map.Entry<String, ResourcePackData> entry : newResourcePacks.entrySet()) {
             addResourcePack(entry.getKey(), entry.getValue().location());
-        }
-    }
-
-    private void addToZip(File folder, ZipOutputStream os) {
-        File[] files = folder.listFiles();
-        if (files == null) return;
-        for (File file : files) {
-            if (file.isDirectory()) {
-                addToZip(file, os);
-                continue;
-            }
-            ZipEntry entry = new ZipEntry(folder.toPath().relativize(file.toPath()).toString());
-            try {
-                os.putNextEntry(entry);
-                Files.copy(file.toPath(), os);
-                os.closeEntry();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

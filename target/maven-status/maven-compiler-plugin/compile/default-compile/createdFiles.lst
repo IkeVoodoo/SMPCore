@@ -25,20 +25,22 @@ me\ikevoodoo\smpcore\commands\arguments\Argument.class
 me\ikevoodoo\smpcore\math\utils\MathUtils.class
 me\ikevoodoo\smpcore\reflection\ReflectionHelper.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\BaseParser.class
+me\ikevoodoo\smpcore\fileserver\FileServerBuilder.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\DoubleParser.class
 me\ikevoodoo\smpcore\utils\CommandUtils.class
-me\ikevoodoo\smpcore\fileserver\FileServerResponse.class
 me\ikevoodoo\smpcore\utils\ThreadUtils.class
 me\ikevoodoo\smpcore\config\annotations\ConfigType.class
 me\ikevoodoo\smpcore\senders\SenderBuilder.class
 me\ikevoodoo\smpcore\text\messaging\Message.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\LongParser.class
 me\ikevoodoo\smpcore\text\messaging\MessageBuilder$1.class
+me\ikevoodoo\smpcore\fileserver\FileServerHandler.class
 me\ikevoodoo\smpcore\listeners\MenuUpdateListener.class
 me\ikevoodoo\smpcore\utils\HealthUtils.class
 me\ikevoodoo\smpcore\commands\arguments\OptionalFor.class
 me\ikevoodoo\smpcore\menus\ItemData.class
 me\ikevoodoo\smpcore\recipes\RecipeData.class
+me\ikevoodoo\smpcore\utils\NetworkUtils.class
 me\ikevoodoo\smpcore\senders\SenderBuilder$1.class
 me\ikevoodoo\smpcore\commands\arguments\ArgumentWrapper.class
 me\ikevoodoo\smpcore\items\functional\FunctionalItem$1.class
@@ -46,7 +48,6 @@ me\ikevoodoo\smpcore\callbacks\eliminations\EliminationCallback.class
 me\ikevoodoo\smpcore\handlers\EliminationHandler.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\ParserRegistry.class
 me\ikevoodoo\smpcore\menus\Menu.class
-me\ikevoodoo\smpcore\fileserver\FileServerConnector.class
 me\ikevoodoo\smpcore\functions\CatchFunction.class
 me\ikevoodoo\smpcore\recipes\RecipeLoader.class
 me\ikevoodoo\smpcore\menus\functional\FunctionalPage.class
@@ -117,6 +118,7 @@ me\ikevoodoo\smpcore\config\annotations\Config.class
 me\ikevoodoo\smpcore\reflection\Test.class
 me\ikevoodoo\smpcore\utils\URLUtils.class
 me\ikevoodoo\smpcore\items\functional\ItemCreator.class
+me\ikevoodoo\smpcore\text\messaging\TextDecorInfo.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\PlayerParser.class
 me\ikevoodoo\smpcore\commands\functional\FunctionalCommand$2.class
 me\ikevoodoo\smpcore\items\ItemClickState.class
@@ -128,7 +130,6 @@ me\ikevoodoo\smpcore\annotations\NoInject.class
 me\ikevoodoo\smpcore\listeners\InventoryEditListener.class
 me\ikevoodoo\smpcore\events\MenuPageOpenEvent.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\FloatParser.class
-me\ikevoodoo\smpcore\fileserver\FileServerRequest.class
 me\ikevoodoo\smpcore\handlers\MenuHandler.class
 me\ikevoodoo\smpcore\utils\ServerUtils.class
 me\ikevoodoo\smpcore\commands\functional\FunctionalCommand.class

@@ -61,6 +61,7 @@ public class MessageBuilder {
     }
 
     public MessageBuilder text(String text) {
+
         last().setText(text);
         return this;
     }
@@ -141,6 +142,22 @@ public class MessageBuilder {
         return messageComponents.get(messageComponents.size() - 1);
     }
 
+    private List<TextDecorInfo> getInfo(String text) {
+        int offset = 0;
+
+        List<MessageProperty> globalProperties = new ArrayList<>();
+
+        while (offset < text.length()) {
+            String sub = text.substring(offset);
+            if (sub.startsWith("[[")) {
+                String prop = sub.substring(2, Math.max(sub.indexOf(']'), 1));
+                System.out.println(prop);
+            }
+        }
+
+        return List.of();
+    }
+
     private MessageBuilder addComponent(BaseComponent comp) {
         addPlain(comp.toLegacyText())
                 .color(comp.getColor());
@@ -173,3 +190,5 @@ public class MessageBuilder {
     }
 
 }
+
+record TextDecorInfo(List<MessageProperty> properties, String text, ChatColor color) { }

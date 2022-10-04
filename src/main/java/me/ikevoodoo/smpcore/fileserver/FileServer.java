@@ -1,80 +1,45 @@
 package me.ikevoodoo.smpcore.fileserver;
 
-import org.bukkit.Bukkit;
+import com.sun.net.httpserver.HttpServer;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
 
-public class FileServer implements Runnable {
+public class FileServer {
 
-    public static void start() {
-        if(thread != null) return;
-        FileServer server = FileServer.instance == null ? new FileServer() : FileServer.instance;
-        thread = new Thread(server);
-        thread.start();
+    private final int port;
+    private final int backlog;
+    private final int maxThreads;
+
+    private final HttpServer server;
+    private ExecutorService executorService;
+
+    protected FileServer(int port, int backlog, int maxThreads, long maxCacheSize, String rootDirectory, List<Function<String, byte[]>> handlers) throws IOException {
+        this.port = port;
+        this.backlog = backlog;
+        this.maxThreads = maxThreads;
+
+        this.server = HttpServer.create(new InetSocketAddress(port), backlog);
+        this.server.createContext("/", new FileServerHandler(maxCacheSize, rootDirectory, handlers));
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.server.setExecutor(this.executorService);
     }
 
-    public static void get(FileServerRequest request) {
-        if(instance == null) instance = new FileServer();
-        requests.add(request);
+    public void start() {
+        this.server.start();
     }
 
-    public static void stop() {
-        if(thread == null) return;
-        thread.interrupt();
-        thread = null;
-        requests.clear();
+    public void stop() {
+        this.server.stop(0);
+        this.executorService.shutdown();
     }
 
-    private static Thread thread;
-    private static FileServer instance;
-    private static final BlockingQueue<FileServerRequest> requests = new LinkedBlockingDeque<>();
-
-    private FileServer() {
-
+    public static FileServerBuilder on(int port) {
+        return new FileServerBuilder().port(port);
     }
 
-    @Override
-    public void run() {
-        while(!Thread.currentThread().isInterrupted()) {
-            FileServerRequest request;
-            try {
-                request = requests.take();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-            File parentFolder = new File(Bukkit.getWorldContainer(), "resourcepacks");
-            if(!parentFolder.exists()) {
-                parentFolder.mkdirs();
-                request.emitResponse(new FileServerResponse("File not found".getBytes(StandardCharsets.UTF_8), 404));
-            } else {
-                try {
-                    request.emitResponse(new FileServerResponse(
-                            Files.readAllBytes(new File(parentFolder, request.getUrl()).toPath()),
-                            200));
-                } catch (IOException e) {
-                    request.emitResponse(new FileServerResponse(
-                            ("Unable to GET " + request.getUrl()).getBytes(StandardCharsets.UTF_8),
-                            404));
-                }
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        FileServer.start();
-        new Thread(() -> {
-            FileServer.get(new FileServerRequest("/test.txt").onResponse(res -> {
-                System.out.println(res.statusCode() + " " + Arrays.toString(res.body()));
-                FileServer.stop();
-            }));
-
-        }).start();
-    }
 }
