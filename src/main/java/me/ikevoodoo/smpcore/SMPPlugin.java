@@ -22,6 +22,7 @@ import me.ikevoodoo.smpcore.menus.functional.FunctionalMenu;
 import me.ikevoodoo.smpcore.menus.functional.MenuCreator;
 import me.ikevoodoo.smpcore.recipes.RecipeLoader;
 import me.ikevoodoo.smpcore.utils.*;
+import me.ikevoodoo.smpcore.utils.health.HealthHelper;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -67,6 +68,8 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     private ConfigHelper configHelper;
 
     private ConfigHandler configHandler;
+
+    private HealthHelper healthHelper;
 
     private MaterialUtils materialUtils;
 
@@ -124,6 +127,9 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
             e.printStackTrace();
         }
         configHelper = new ConfigHelper(this);
+
+        this.healthHelper = new HealthHelper(this);
+
         materialUtils = new MaterialUtils();
         try {
             cacheFolder = FileUtils.getOrCreate(getDataFolder(), "data", "cache");
@@ -208,6 +214,10 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     public final ConfigHelper getConfigHelper() {
         return configHelper;
+    }
+
+    public final HealthHelper getHealthHelper() {
+        return this.healthHelper;
     }
 
     public final ConfigHandler getConfigHandler() {

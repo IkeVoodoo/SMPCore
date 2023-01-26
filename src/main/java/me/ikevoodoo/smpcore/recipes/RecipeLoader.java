@@ -171,7 +171,7 @@ public class RecipeLoader {
             Optional<Object> replacement = getReplacement(key, replacements);
             config.set("recipe." + key + ".item", replacement.orElse(toReadable(choices[i])));
         }
-        config.set("options.item", toReadable(recipe.recipe().getResult().getType()));
+        config.set("options.type", toReadable(recipe.recipe().getResult().getType()));
         config.set("options.shaped", recipe.recipe() instanceof ShapedRecipe);
         config.set("options.outputAmount", recipe.recipe().getResult().getAmount());
         try {

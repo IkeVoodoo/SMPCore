@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+@Deprecated
 public class HealthUtils {
 
     private HealthUtils() {
