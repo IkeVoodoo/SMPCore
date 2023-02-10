@@ -41,6 +41,8 @@ public abstract class CustomItem {
 
     private final List<NamespacedKey> keys = new ArrayList<>();
     private boolean decreaseOnUse = false;
+    private boolean allowCombustion = true;
+    private boolean allowCactusDamage = true;
 
     private final CustomItemData data = new CustomItemData();
     private Pair<NamespacedKey, Recipe> recipe;
@@ -242,6 +244,24 @@ public abstract class CustomItem {
     public final CustomItem setDecreaseOnUse(boolean decreaseOnUse) {
         this.decreaseOnUse = decreaseOnUse;
         return this;
+    }
+
+    public final CustomItem setAllowCombustion(boolean allowCombustion) {
+        this.allowCombustion = allowCombustion;
+        return this;
+    }
+
+    public final CustomItem setAllowCactusDamage(boolean allowCactusDamage) {
+        this.allowCactusDamage = allowCactusDamage;
+        return this;
+    }
+
+    public final boolean shouldAllowCombustion() {
+        return allowCombustion;
+    }
+
+    public final boolean shouldAllowCactusDamage() {
+        return allowCactusDamage;
     }
 
     public abstract ItemStack createItem(Player player);

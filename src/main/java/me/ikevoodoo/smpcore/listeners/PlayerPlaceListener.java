@@ -15,7 +15,7 @@ public class PlayerPlaceListener extends CallbackListener<PlayerPlaceBlockCallba
 
     @EventHandler
     public void on(BlockPlaceEvent event) {
-        Player player = event.getPlayer();
+        var player = event.getPlayer();
         ItemStack item = event.getItemInHand();
         Block block = event.getBlock();
         Block placed = event.getBlockPlaced();

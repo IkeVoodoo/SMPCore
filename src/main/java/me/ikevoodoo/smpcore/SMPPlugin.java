@@ -118,7 +118,8 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
                 new PlayerSleepListener(),
                 new InventoryEditListener(this),
                 new ChatMessageListener(this),
-                new MenuUpdateListener(this)
+                new MenuUpdateListener(this),
+                new ItemDamageListener(this)
         );
         configHandler = new ConfigHandler(this);
         try {

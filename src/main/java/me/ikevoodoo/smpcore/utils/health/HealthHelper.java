@@ -82,14 +82,13 @@ public final class HealthHelper {
 
     public HealthSetResult increaseMaxHealthIfUnder(LivingEntity entity, double amount, double max) {
         double health = this.getMaxHealth(entity);
-        double val = health + amount;
+        double toSet = health + amount;
 
-        double newHealth = this.setMaxHealth(entity, Math.min(val, max));
-
-        if (val > max) {
-            return new HealthSetResult(HealthSetResult.ABOVE_MAX, health, newHealth);
+        if (toSet > max) {
+            return new HealthSetResult(HealthSetResult.ABOVE_MAX, health, health);
         }
 
+        double newHealth = this.setMaxHealth(entity, Math.min(toSet, max));
         return new HealthSetResult(HealthSetResult.OK, health, newHealth);
     }
 
@@ -101,10 +100,11 @@ public final class HealthHelper {
         double health = this.getMaxHealth(entity);
         double val = health - amount;
 
-        double newHealth = this.setMaxHealth(entity, Math.max(val, min));
         if (val < min) {
-            return new HealthSetResult(HealthSetResult.BELOW_MIN, health, newHealth);
+            return new HealthSetResult(HealthSetResult.BELOW_MIN, health, health);
         }
+
+        double newHealth = this.setMaxHealth(entity, Math.max(val, min));
 
         return new HealthSetResult(HealthSetResult.OK, health, newHealth);
     }
