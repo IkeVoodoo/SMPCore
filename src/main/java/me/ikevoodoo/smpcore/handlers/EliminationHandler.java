@@ -17,16 +17,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public final class EliminationHandler extends PluginProvider {
 
     private final NamespacedKey eliminationKey;
     private final NamespacedKey bannedAtKey;
+    private final NamespacedKey bannedMessageKey;
 
     private final List<EliminationCallback> eliminationCallbacks = new ArrayList<>();
     private final List<EliminationCallback> reviveCallbacks = new ArrayList<>();
@@ -38,6 +36,7 @@ public final class EliminationHandler extends PluginProvider {
         super(plugin);
         eliminationKey = makeKey("eliminated_player");
         bannedAtKey = makeKey("eliminated_at");
+        bannedMessageKey = makeKey("eliminated_message");
     }
 
     public void save(File file) throws IOException {
@@ -52,12 +51,12 @@ public final class EliminationHandler extends PluginProvider {
         }
     }
 
-    public HashMap<UUID, Number> getEliminatedPlayers() {
+    public Map<UUID, Number> getEliminatedPlayers() {
         return cache.fetch();
     }
 
     public void eliminate(Player player) {
-        eliminate(player, Long.MAX_VALUE);
+        eliminate(player, EliminationData.infiniteTime());
     }
 
     public void eliminate(UUID id) {
@@ -67,26 +66,27 @@ public final class EliminationHandler extends PluginProvider {
         }
     }
 
-    public void markEliminated(UUID id, long banTime) {
-        addToCache(id, banTime == Long.MAX_VALUE ? banTime : System.currentTimeMillis() + banTime);
+    public void eliminate(UUID id, EliminationData eliminationData) {
+        Player player = Bukkit.getPlayer(id);
+        if(player != null) {
+            eliminate(player, eliminationData);
+        }
     }
 
-    public void eliminate(Player player, long banTime) {
+    public void markEliminated(UUID id, EliminationData eliminationData) {
+        addToCache(id, eliminationData.getCacheTime());
+    }
+
+    public void eliminate(Player player, EliminationData eliminationData) {
         if (isEliminated(player)) {
             return;
         }
-        markEliminated(player.getUniqueId(), banTime);
+        markEliminated(player.getUniqueId(), eliminationData);
         PersistentDataContainer container = player.getPersistentDataContainer();
-        container.set(eliminationKey, PersistentDataType.LONG, banTime);
+        container.set(eliminationKey, PersistentDataType.LONG, eliminationData.banTime());
         container.set(bannedAtKey, PersistentDataType.LONG, System.currentTimeMillis());
+        container.set(bannedMessageKey, PersistentDataType.STRING, eliminationData.message());
         eliminationCallbacks.forEach(callback -> callback.whenTriggered(EliminationType.ELIMINATED, player));
-    }
-
-    public void eliminate(UUID id, long banTime) {
-        Player player = Bukkit.getPlayer(id);
-        if(player != null) {
-            eliminate(player, banTime);
-        }
     }
 
     public boolean isEliminated(Player player) {
@@ -112,6 +112,16 @@ public final class EliminationHandler extends PluginProvider {
         PersistentDataContainer container = player.getPersistentDataContainer();
         Long value = container.get(bannedAtKey, PersistentDataType.LONG);
         return value == null ? 0 : value;
+    }
+
+    public String getBanMessage(Player player) {
+        PersistentDataContainer container = player.getPersistentDataContainer();
+        String value = container.get(bannedMessageKey, PersistentDataType.STRING);
+        return value == null ? EliminationData.DEFAULT_MESSAGE : value;
+    }
+
+    public EliminationData getEliminationData(Player player) {
+        return new EliminationData(getBanMessage(player), getBanTime(player));
     }
 
     public void revive(Player player) {
@@ -140,20 +150,20 @@ public final class EliminationHandler extends PluginProvider {
     }
 
     public void eliminateAll() {
-        eliminateAll(Long.MAX_VALUE);
+        eliminateAll(EliminationData.infiniteTime());
     }
 
-    public void eliminateAll(long banTime) {
+    public void eliminateAll(EliminationData eliminationData) {
         List<UUID> excluded = new ArrayList<>();
         Bukkit.getOnlinePlayers().forEach(player -> {
             if(!excluded.contains(player.getUniqueId())) {
                 excluded.add(player.getUniqueId());
-                eliminate(player, banTime);
+                eliminate(player, eliminationData);
             }
         });
         for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
             if (!excluded.contains(offlinePlayer.getUniqueId())) {
-                eliminateOffline(offlinePlayer, banTime);
+                eliminateOffline(offlinePlayer, eliminationData);
             }
         }
     }
@@ -183,17 +193,17 @@ public final class EliminationHandler extends PluginProvider {
     }
 
     public void eliminateOffline(OfflinePlayer player) {
-        eliminateOffline(player, Long.MAX_VALUE);
+        eliminateOffline(player, EliminationData.infiniteTime());
     }
 
-    public void eliminateOffline(OfflinePlayer player, long banTime) {
+    public void eliminateOffline(OfflinePlayer player, EliminationData eliminationData) {
         if (player == null)
             return;
         if (player.isOnline())
-            this.eliminate(player.getUniqueId(), banTime);
+            this.eliminate(player.getUniqueId(), eliminationData);
         else {
-            getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), id -> eliminate(id, banTime));
-            this.markEliminated(player.getUniqueId(), banTime);
+            getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), id -> eliminate(id, eliminationData));
+            this.markEliminated(player.getUniqueId(), eliminationData);
         }
     }
 

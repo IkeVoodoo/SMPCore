@@ -1,5 +1,7 @@
 package me.ikevoodoo.smpcore.utils;
 
+import org.bukkit.ChatColor;
+
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
@@ -12,6 +14,11 @@ public class StringUtils {
 
     private StringUtils() {
 
+    }
+
+    public static String color(String s) {
+        if (s == null) return null;
+        return ChatColor.translateAlternateColorCodes('&', s);
     }
 
     private static int distance(String a, String b) {

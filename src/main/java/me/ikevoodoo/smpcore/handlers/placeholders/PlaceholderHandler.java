@@ -8,7 +8,7 @@ public class PlaceholderHandler {
     /**
      * Create a new PlaceholderBuilder
      *
-     * @param prefix The prefix for all of the placeholders
+     * @param prefix The prefix for all the placeholders
      * @param version The placeholder version
      *
      * @return A new PlaceholderBuilder

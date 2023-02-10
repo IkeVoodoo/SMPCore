@@ -14,7 +14,7 @@ public class FastUUIDCache {
 
     private final HashMap<UUID, Number> uuids = new HashMap<>();
 
-    public HashMap<UUID, Number> fetch() {
+    public Map<UUID, Number> fetch() {
         return uuids;
     }
 
@@ -51,6 +51,6 @@ public class FastUUIDCache {
     }
 
     public boolean has(UUID id) {
-        return uuids.containsKey(id);
+        return this.uuids.containsKey(id);
     }
 }

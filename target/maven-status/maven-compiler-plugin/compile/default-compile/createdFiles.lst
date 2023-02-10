@@ -106,6 +106,7 @@ me\ikevoodoo\smpcore\handlers\ResourcePackHandler.class
 me\ikevoodoo\smpcore\config\annotations\StringDefault.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\UUIDParser.class
 me\ikevoodoo\smpcore\config\annotations\IntDefault.class
+me\ikevoodoo\smpcore\handlers\EliminationData.class
 me\ikevoodoo\smpcore\colors\GradientGenerator.class
 me\ikevoodoo\smpcore\shared\PluginProvider.class
 me\ikevoodoo\smpcore\utils\HashUtils.class

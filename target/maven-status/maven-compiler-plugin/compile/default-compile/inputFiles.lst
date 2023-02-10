@@ -40,6 +40,7 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\UUIDParser.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\ChatMessageListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\commands\arguments\parsers\FloatParser.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\listeners\ItemDamageListener.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\reflection\ReflectionHelper.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\menus\v2\widgets\Widget.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\MenuHandler.java
@@ -135,5 +136,6 @@ C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\confi
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\HashUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\RecipeUtils.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\recipes\RecipeData.java
+C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\handlers\EliminationData.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\utils\health\HealthHandler.java
 C:\Users\simon\Documents\GitHub\SMPCore\src\main\java\me\ikevoodoo\smpcore\particles\PolygonParticleRenderer.java

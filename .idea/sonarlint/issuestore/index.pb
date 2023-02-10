@@ -58,8 +58,6 @@ j
 :src/main/java/me/ikevoodoo/smpcore/utils/NetworkUtils.java,a\3\a3c82cb6c983caa7271b208d48a09918fd45d984
 f
 6src/main/java/me/ikevoodoo/smpcore/utils/URLUtils.java,7\e\7edaede62b899f55a6c9d50c7e2e1f7cb86aeda9
-i
-9src/main/java/me/ikevoodoo/smpcore/utils/StreamUtils.java,6\d\6dc2be154fe5a973ba192b9431454af9b9e0de12
 t
 Dsrc/main/java/me/ikevoodoo/smpcore/fileserver/FileServerBuilder.java,6\e\6e010dedd5e09ad46d37ae8836def2053b9fad15
 t
