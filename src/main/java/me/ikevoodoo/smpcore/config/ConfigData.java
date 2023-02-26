@@ -128,19 +128,22 @@ public class ConfigData {
                 }
 
                 var valueClass = value.getClass();
-
                 if (List.class.isAssignableFrom(valueClass)) {
-                    var listType = this.getListType(valueClass);
+                    var listType = this.getListType(field); // such as java.lang.String
                     if (listType == null) {
                         // Unable to fetch the list type, log this!
                         continue;
                     }
 
                     var listName = listType.getName();
-
                     var list = (List<?>) value;
 
-                    ConfigurationSection elementSection = section.createSection(field.getName());
+                    if (!listType.isAnnotationPresent(ConfigType.class)) {
+                        section.set(fieldName, list);
+                        continue;
+                    }
+
+                    ConfigurationSection elementSection = section.createSection(fieldName);
                     elementSection.set("doNotTouch", listType.getName());
                     for (int i = 0; i < list.size(); i++) {
                         var sec = elementSection.createSection(listName + "_" + i);
@@ -162,20 +165,26 @@ public class ConfigData {
                 if (section.contains(fieldName)) continue;
 
                 if(field.isEnumConstant()) {
-                    section.set(field.getName(), value.toString());
+                    section.set(fieldName, value.toString());
                     continue;
                 }
 
-                section.set(field.getName(), value);
+                section.set(fieldName, value);
             } catch (IllegalAccessException e) {
                 // Call log printer
-            } catch (ClassNotFoundException ignored) {
+            } catch (ClassNotFoundException e) {
                 // Unable to get the list type, log this!
+                e.printStackTrace();
             }
         }
 
         for(Class<?> nested : clazz.getDeclaredClasses()) {
-            set(nested, instance, section.createSection(nested.getSimpleName().toLowerCase(Locale.ROOT)));
+            var sectionName = nested.getSimpleName();
+            if (sectionName.length() > 1) {
+                sectionName = Character.toLowerCase(sectionName.charAt(0)) + sectionName.substring(1);
+            }
+
+            set(nested, instance, section.createSection(sectionName));
         }
     }
 
@@ -195,6 +204,8 @@ public class ConfigData {
                         ConfigurationSection listSection = section.getConfigurationSection(field.getName());
                         if (listSection == null) continue;
                         String storedType = listSection.getString("doNotTouch");
+                        if (storedType == null) continue;
+
                         ClassLoader loader = getClass().getClassLoader();
                         Class<?> elementType = loader.loadClass(storedType);
                         List<Object> list = new ArrayList<>();
@@ -283,9 +294,10 @@ public class ConfigData {
         }
     }
 
-    private Class<?> getListType(Class<?> instanceType) throws ClassNotFoundException {
-        var listType = instanceType.getAnnotation(ListType.class);
+    private Class<?> getListType(Field field) throws ClassNotFoundException {
+        var listType = field.getAnnotation(ListType.class);
         if (listType == null) return null;
+
         var className = listType.value();
         if (className.isEmpty() || className.isBlank()) {
             throw new IllegalStateException("ListType cannot be blank!");
