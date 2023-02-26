@@ -11,6 +11,7 @@ import me.ikevoodoo.smpcore.config.ConfigData;
 import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
 import me.ikevoodoo.smpcore.config.annotations.Config;
+import me.ikevoodoo.smpcore.debug.LogCollector;
 import me.ikevoodoo.smpcore.handlers.*;
 import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
@@ -45,6 +46,7 @@ import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
@@ -86,6 +88,8 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     @Override
     public final void onLoad() {
+        LogCollector.init();
+
         onPreload();
     }
 
@@ -152,6 +156,13 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
         }
 
         whenDisabled();
+
+        var file = new File("smpcore.logs");
+        try {
+            Files.writeString(file.toPath(), LogCollector.getLogs(), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

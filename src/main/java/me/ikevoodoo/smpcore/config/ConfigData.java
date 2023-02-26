@@ -39,6 +39,8 @@ public class ConfigData {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+
+        loadConfig();
         if(!this.file.exists()) {
             if (!this.file.getParentFile().mkdirs()) {
                 plugin.getLogger().warning("Unable to create file parent folder: " + this.file.getParentFile().getAbsolutePath());
@@ -47,14 +49,18 @@ public class ConfigData {
                 if(!this.file.createNewFile()) {
                     plugin.getLogger().warning("Unable to create file: " + this.file.getAbsolutePath());
                 }
-                loadConfig();
-                set(clazz, null, config);
+                set(clazz, null, config, true);
                 save();
                 return;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            // If the file already exists, try to update it!
+            set(clazz, null, config, false);
+            save();
         }
+
         reload();
     }
 
@@ -89,7 +95,7 @@ public class ConfigData {
 
     private void loadConfig() {
         this.config = switch (type) {
-            case "yml", "yaml" -> YamlConfiguration.loadConfiguration(file);
+            case "yml", "yaml" -> YamlConfiguration.loadConfiguration(this.file);
             default -> throw new IllegalArgumentException("Unknown config type: " + type);
         };
     }
@@ -101,7 +107,6 @@ public class ConfigData {
         for(Class<?> nested : clazz.getDeclaredClasses()) {
             setNestedDefaults(nested, clazz.getSimpleName().toLowerCase(Locale.ROOT));
         }
-
     }
 
     private void setNestedDefaults(Class<?> clazz, String path) throws IllegalAccessException {
@@ -110,41 +115,54 @@ public class ConfigData {
         }
     }
 
-    private void set(Class<?> clazz, Object o, ConfigurationSection section) {
-        for(Field field : clazz.getFields()) {
+    private void set(Class<?> clazz, Object instance, ConfigurationSection section, boolean replace) {
+        for (var field : clazz.getFields()) {
             try {
-                if(field.getType().isAnnotationPresent(Config.class)) {
-                    set(field.getType(), o, section.createSection(field.getName()));
+
+                var fieldType = field.getType();
+                var fieldName = field.getName();
+
+                if (!replace && section.contains(fieldName)) continue;
+
+                if (fieldType.isAnnotationPresent(Config.class)) {
+                    set(fieldType, instance, section.createSection(fieldName), replace);
                     continue;
                 }
-                Object value = field.get(o);
-                if(value == null)
-                    continue;
 
-                // check if class is a list (implements/extends java.util.List)
-                if(List.class.isAssignableFrom(field.getType())) {
-                    List<?> list = (List<?>) value;
-                    if(!list.isEmpty()) {
-                        Class<?> listType = list.get(0).getClass();
-                        if(!listType.isAnnotationPresent(ConfigType.class)) {
-                            section.set(field.getName(), list);
-                            continue;
-                        }
-                        String elementName = listType.getSimpleName().toLowerCase(Locale.ROOT);
-                        ConfigurationSection elementSection = section.createSection(field.getName());
-                        elementSection.set("doNotTouch", listType.getName());
-                        for (int i = 0; i < list.size(); i++) {
-                            ConfigurationSection sec = elementSection.createSection(elementName + "_" + i);
-                            Object element = list.get(i);
-                            for (Field f : listType.getDeclaredFields()) {
-                                boolean accessible = f.canAccess(element);
-                                f.setAccessible(true);
-                                sec.set(f.getName(), f.get(element));
-                                f.setAccessible(accessible);
-                            }
-                        }
+                var value = this.getValue(field, instance);
+                if (value == null) {
+                    // The value is null, bruh
+                    continue;
+                }
+
+                var valueClass = value.getClass();
+
+                if (List.class.isAssignableFrom(valueClass)) {
+                    var listType = this.getListType(valueClass);
+                    if (listType == null) {
+                        // Unable to fetch the list type, log this!
                         continue;
                     }
+
+                    var listName = listType.getName();
+
+                    var list = (List<?>) value;
+
+                    ConfigurationSection elementSection = section.createSection(field.getName());
+                    elementSection.set("doNotTouch", listType.getName());
+                    for (int i = 0; i < list.size(); i++) {
+                        var sec = elementSection.createSection(listName + "_" + i);
+                        var element = list.get(i);
+
+                        for (var f : listType.getDeclaredFields()) {
+                            boolean accessible = f.canAccess(element);
+                            f.setAccessible(true);
+                            sec.set(f.getName(), f.get(element));
+                            f.setAccessible(accessible);
+                        }
+                    }
+
+                    continue;
                 }
 
                 if(field.isEnumConstant()) {
@@ -153,19 +171,23 @@ public class ConfigData {
                 }
 
                 section.set(field.getName(), value);
-            } catch (IllegalAccessException ex) {
-                ex.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // Call log printer
+            } catch (ClassNotFoundException ignored) {
+                // Unable to get the list type, log this!
             }
         }
+
         for(Class<?> nested : clazz.getDeclaredClasses()) {
-            set(nested, o, section.createSection(nested.getSimpleName().toLowerCase(Locale.ROOT)));
+            set(nested, instance, section.createSection(nested.getSimpleName().toLowerCase(Locale.ROOT)), replace);
         }
     }
 
     private void load(Class<?> clazz, ConfigurationSection section) {
         if(section == null)
             return;
-        for(Field field : clazz.getFields()) {
+
+        for(var field : clazz.getFields()) {
             try {
                 if(field.getType().isAnnotationPresent(Config.class)) {
                     load(field.getType(), section.getConfigurationSection(field.getName()));
@@ -183,7 +205,7 @@ public class ConfigData {
                         for(String key : listSection.getKeys(false)) {
                             ConfigurationSection sec = listSection.getConfigurationSection(key);
                             if(sec == null) continue;
-                            Object element = get(elementType);
+                            var element = instantiateClass(elementType);
                             if(element == null)
                                 continue;
                             for(Field f : elementType.getDeclaredFields()) {
@@ -227,7 +249,7 @@ public class ConfigData {
         }
     }
 
-    private Object get(Class<?> clazz) {
+    private Object instantiateClass(Class<?> clazz) {
         Constructor<?>[] constructors = clazz.getConstructors();
         for (Constructor<?> constructor : constructors) {
             if(constructor.getParameterCount() == 0) {
@@ -263,5 +285,69 @@ public class ConfigData {
                 defaults.put(path, field.get(null));
             }
         }
+    }
+
+    private Class<?> getListType(Class<?> instanceType) throws ClassNotFoundException {
+        var listType = instanceType.getAnnotation(ListType.class);
+        if (listType == null) return null;
+        var className = listType.value();
+        if (className.isEmpty() || className.isBlank()) {
+            throw new IllegalStateException("ListType cannot be blank!");
+        }
+
+        return Class.forName(className);
+    }
+
+    private Object getValue(Field field, Object instance) throws IllegalAccessException {
+        var fieldType = field.getType();
+
+        if (isOfTypeOrBoxed(fieldType, double.class)) {
+            return getFieldValue(field, instance, DoubleDefault.class);
+        }
+
+        if (isOfTypeOrBoxed(fieldType, int.class)) {
+            return getFieldValue(field, instance, IntDefault.class);
+        }
+
+        if (isOfTypeOrBoxed(fieldType, String.class)) {
+            return getFieldValue(field, instance, StringDefault.class);
+        }
+
+        if (isOfTypeOrBoxed(fieldType, boolean.class)) {
+            return getFieldValue(field, instance, BooleanDefault.class);
+        }
+
+        if (isOfTypeOrBoxed(fieldType, long.class)) {
+            return getFieldValue(field, instance, LongDefault.class);
+        }
+
+        return field.get(instance); // Return whatever value the field holds if it is not a primitive
+    }
+
+    private Object getFieldValue(Field field, Object instance, Class<? extends Annotation> annotation) throws IllegalAccessException {
+        if (field.isAnnotationPresent(annotation)) {
+            try {
+                var valueField = annotation.getDeclaredField("value");
+
+                return valueField.get(null);
+            } catch (NoSuchFieldException ignored) {
+                // Silently ignore exception if the annotation doesn't have a value field
+            }
+        }
+
+        return field.get(instance);
+    }
+
+    private boolean isOfTypeOrBoxed(Class<?> clazz, Class<?> type) {
+        return clazz == type || clazz == getBoxedTypeOf(type);
+    }
+
+    private Class<?> getBoxedTypeOf(Class<?> clazz) {
+        if (clazz == double.class) return Double.class;
+        if (clazz == int.class) return Integer.class;
+        if (clazz == boolean.class) return Boolean.class;
+        if (clazz == long.class) return Long.class;
+
+        return null; // No boxed type is available
     }
 }

@@ -20,21 +20,23 @@ public class ConfigHandler {
     }
 
     public void registerConfig(ConfigData config) {
-        configs.put(config.getName(), config);
+        this.configs.put(config.getName(), config);
     }
 
     public ConfigData getConfig(String name) {
-        return configs.get(name);
+        return this.configs.get(name);
     }
 
     public boolean exists(String name) {
-        return this.configs.containsKey(name) && new File(plugin.getDataFolder(), name).exists();
+        return this.configs.containsKey(name) && this.getConfigFile(name).exists();
     }
 
     public FileConfiguration getYmlConfig(String name) {
-        ConfigData config = getConfig(name);
-        if (config == null)
-            return yamlConfigs.computeIfAbsent(name, s -> YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), name)));
+        var config = this.getConfig(name);
+        if (config == null) {
+            return this.yamlConfigs.computeIfAbsent(name, this::loadConfig);
+        }
+
         return config.getConfig();
     }
 
@@ -43,12 +45,21 @@ public class ConfigHandler {
     }
 
     public void reload() {
-        for (ConfigData config : configs.values()) {
+        for (var config : this.configs.values()) {
             config.reload();
         }
 
-        // Lazy reload of yaml configs
-        yamlConfigs.clear();
+        for (var entry : this.yamlConfigs.entrySet()) {
+            entry.setValue(loadConfig(entry.getKey()));
+        }
+    }
+
+    private YamlConfiguration loadConfig(String name) {
+        return YamlConfiguration.loadConfiguration(getConfigFile(name));
+    }
+
+    private File getConfigFile(String name) {
+        return new File(this.plugin.getDataFolder(), name);
     }
 
 }

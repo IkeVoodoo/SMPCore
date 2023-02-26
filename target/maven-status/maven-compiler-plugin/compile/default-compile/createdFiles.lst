@@ -3,6 +3,7 @@ me\ikevoodoo\smpcore\functional\FunctionalBase.class
 me\ikevoodoo\smpcore\callbacks\Callback.class
 me\ikevoodoo\smpcore\texture\ResourcePackData.class
 me\ikevoodoo\smpcore\config\annotations\DoubleDefault.class
+me\ikevoodoo\smpcore\debug\LogCollector.class
 me\ikevoodoo\smpcore\handlers\InventoryActionHandler.class
 me\ikevoodoo\smpcore\items\functional\FunctionalItem.class
 me\ikevoodoo\smpcore\text\messaging\MessageBuilder.class
@@ -93,6 +94,7 @@ me\ikevoodoo\smpcore\menus\v2\PagedMenu.class
 me\ikevoodoo\smpcore\commands\arguments\Arguments$1.class
 me\ikevoodoo\smpcore\utils\PDCUtils.class
 me\ikevoodoo\smpcore\text\messaging\utils\MessageUtils.class
+me\ikevoodoo\smpcore\debug\LogCollector$LogHandler.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\BooleanParser.class
 me\ikevoodoo\smpcore\items\CustomItem.class
 me\ikevoodoo\smpcore\utils\health\HealthHelper.class
@@ -133,6 +135,7 @@ me\ikevoodoo\smpcore\commands\functional\FunctionalCommand$2.class
 me\ikevoodoo\smpcore\items\ItemClickState.class
 me\ikevoodoo\smpcore\listeners\PlayerConnectListener.class
 me\ikevoodoo\smpcore\menus\v2\widgets\Widget.class
+me\ikevoodoo\smpcore\debug\LogCollector$1.class
 me\ikevoodoo\smpcore\listeners\PlayerPlaceListener.class
 me\ikevoodoo\smpcore\particles\PolygonParticleRenderer.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderHandler.class
