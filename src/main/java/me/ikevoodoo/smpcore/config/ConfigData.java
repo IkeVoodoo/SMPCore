@@ -116,8 +116,6 @@ public class ConfigData {
                 var fieldType = field.getType();
                 var fieldName = field.getName();
 
-                if (section.contains(fieldName)) continue;
-
                 if (fieldType.isAnnotationPresent(Config.class)) {
                     set(fieldType, instance, section.createSection(fieldName));
                     continue;
@@ -151,6 +149,8 @@ public class ConfigData {
                         for (var f : listType.getDeclaredFields()) {
                             boolean accessible = f.canAccess(element);
                             f.setAccessible(true);
+
+                            if (sec.contains(f.getName())) continue;
                             sec.set(f.getName(), f.get(element));
                             f.setAccessible(accessible);
                         }
@@ -158,6 +158,8 @@ public class ConfigData {
 
                     continue;
                 }
+
+                if (section.contains(fieldName)) continue;
 
                 if(field.isEnumConstant()) {
                     section.set(field.getName(), value.toString());
