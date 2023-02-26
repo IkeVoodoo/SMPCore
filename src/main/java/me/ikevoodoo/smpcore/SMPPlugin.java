@@ -88,7 +88,8 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     @Override
     public final void onLoad() {
-        LogCollector.init();
+//        LogCollector.init();
+        // Use log collector once it's done
 
         onPreload();
     }

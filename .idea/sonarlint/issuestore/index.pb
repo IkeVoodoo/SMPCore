@@ -14,8 +14,6 @@ m
 =src/main/java/me/ikevoodoo/smpcore/recipes/RecipeOptions.java,7\c\7c3bce8392194d0d046c5d81c905ec921eed1a86
 r
 Bsrc/main/java/me/ikevoodoo/smpcore/utils/random/MaterialUtils.java,e\f\ef98a1e077f96c58742b08a3e8a52c35fc2b4709
-q
-Asrc/main/java/me/ikevoodoo/smpcore/config/annotations/Config.java,4\d\4d9a35f780130ad222361911c765deb46c7df708
 l
 <src/main/java/me/ikevoodoo/smpcore/annotations/Property.java,e\4\e4c3bd66763e73758f8b5d9f236f678661c24d3d
 m

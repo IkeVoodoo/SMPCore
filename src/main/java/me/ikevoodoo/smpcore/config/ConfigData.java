@@ -40,7 +40,6 @@ public class ConfigData {
             e.printStackTrace();
         }
 
-        loadConfig();
         if(!this.file.exists()) {
             if (!this.file.getParentFile().mkdirs()) {
                 plugin.getLogger().warning("Unable to create file parent folder: " + this.file.getParentFile().getAbsolutePath());
@@ -49,19 +48,12 @@ public class ConfigData {
                 if(!this.file.createNewFile()) {
                     plugin.getLogger().warning("Unable to create file: " + this.file.getAbsolutePath());
                 }
-                set(clazz, null, config, true);
-                save();
-                return;
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            // If the file already exists, try to update it!
-            set(clazz, null, config, false);
-            save();
         }
 
-        reload();
+        this.reload();
     }
 
     public String getName() {
@@ -83,6 +75,9 @@ public class ConfigData {
     public void reload() {
         loadConfig();
         load(clazz, config);
+
+        this.set(clazz, null, this.config); // Try to update.
+        this.save();
     }
 
     public void save() {
@@ -115,17 +110,16 @@ public class ConfigData {
         }
     }
 
-    private void set(Class<?> clazz, Object instance, ConfigurationSection section, boolean replace) {
+    private void set(Class<?> clazz, Object instance, ConfigurationSection section) {
         for (var field : clazz.getFields()) {
             try {
-
                 var fieldType = field.getType();
                 var fieldName = field.getName();
 
-                if (!replace && section.contains(fieldName)) continue;
+                if (section.contains(fieldName)) continue;
 
                 if (fieldType.isAnnotationPresent(Config.class)) {
-                    set(fieldType, instance, section.createSection(fieldName), replace);
+                    set(fieldType, instance, section.createSection(fieldName));
                     continue;
                 }
 
@@ -179,7 +173,7 @@ public class ConfigData {
         }
 
         for(Class<?> nested : clazz.getDeclaredClasses()) {
-            set(nested, instance, section.createSection(nested.getSimpleName().toLowerCase(Locale.ROOT)), replace);
+            set(nested, instance, section.createSection(nested.getSimpleName().toLowerCase(Locale.ROOT)));
         }
     }
 

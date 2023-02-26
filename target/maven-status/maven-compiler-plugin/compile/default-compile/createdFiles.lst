@@ -135,7 +135,6 @@ me\ikevoodoo\smpcore\commands\functional\FunctionalCommand$2.class
 me\ikevoodoo\smpcore\items\ItemClickState.class
 me\ikevoodoo\smpcore\listeners\PlayerConnectListener.class
 me\ikevoodoo\smpcore\menus\v2\widgets\Widget.class
-me\ikevoodoo\smpcore\debug\LogCollector$1.class
 me\ikevoodoo\smpcore\listeners\PlayerPlaceListener.class
 me\ikevoodoo\smpcore\particles\PolygonParticleRenderer.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderHandler.class
@@ -144,6 +143,7 @@ me\ikevoodoo\smpcore\listeners\InventoryEditListener.class
 me\ikevoodoo\smpcore\events\MenuPageOpenEvent.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\FloatParser.class
 me\ikevoodoo\smpcore\handlers\MenuHandler.class
+me\ikevoodoo\smpcore\config\annotations\ListType.class
 me\ikevoodoo\smpcore\utils\ServerUtils.class
 me\ikevoodoo\smpcore\commands\functional\FunctionalCommand.class
 me\ikevoodoo\smpcore\utils\Pair.class
