@@ -47,9 +47,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         Arguments arguments = new Arguments(sender, this.args, args);
         var context = new Context<>(sender, arguments);
         if (!arguments.match()) {
-            System.out.println("Arguments don't match!");
             if(args.length > 0) {
-                System.out.println("Argument length is " + args.length);
                 SMPCommand subCommand = this.subCommands.get(args[0]);
                 if(subCommand != null) {
                     String msg = subCommand.getInvalidArgsMessage(context, subCommand.name);
@@ -189,8 +187,6 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
             builder.append(raw.get(i)).append(" ");
         }
-
-        System.out.println("Raw Size: " + raw.size() + " Arg size: " + contextArgs.typeLength());
 
         for (int i = raw.size(); i < contextArgs.typeLength(); i++) {
             var difference = differences.get(i);
