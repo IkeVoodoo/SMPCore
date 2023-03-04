@@ -184,6 +184,12 @@ public class ConfigData {
                 sectionName = Character.toLowerCase(sectionName.charAt(0)) + sectionName.substring(1);
             }
 
+            final var existingSection = section.getConfigurationSection(sectionName);
+            if (existingSection != null) {
+                set(nested, instance, existingSection);
+                continue;
+            }
+
             set(nested, instance, section.createSection(sectionName));
         }
     }

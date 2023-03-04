@@ -191,9 +191,10 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     public final void reload(boolean skipEvent) {
         reloadConfig();
-        configHandler.reload();
-        for(CustomItem customItem : customItems.values())
+        this.configHandler.reload();
+        for(var customItem : this.customItems.values())
             customItem.reload();
+
         if(!skipEvent) this.onReload();
     }
 
@@ -306,7 +307,7 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
             return;
         }
 
-        CommandUtils.register(command);
+        CommandManager.registerCommand(command);
     }
 
     public final void addCommands(List<SMPCommand> commands) {

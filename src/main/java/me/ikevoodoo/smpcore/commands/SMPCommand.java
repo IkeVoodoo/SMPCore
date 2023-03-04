@@ -82,7 +82,6 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
                     return true;
                 }
             }
-            default -> {}
         }
 
         if (args.length == 0) {

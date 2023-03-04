@@ -15,7 +15,6 @@ me\ikevoodoo\smpcore\utils\HealthUtils$SetResult.class
 me\ikevoodoo\smpcore\functional\loop\FunctionalLoopBase.class
 me\ikevoodoo\smpcore\listeners\ItemDamageListener$1.class
 me\ikevoodoo\smpcore\text\messaging\MessageComponent.class
-me\ikevoodoo\smpcore\utils\CommandUtils$1.class
 me\ikevoodoo\smpcore\config\annotations\LongDefault.class
 me\ikevoodoo\smpcore\listeners\ChatMessageListener.class
 me\ikevoodoo\smpcore\config\annotations\BooleanDefault.class
@@ -29,9 +28,9 @@ me\ikevoodoo\smpcore\reflection\ReflectionHelper.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\BaseParser.class
 me\ikevoodoo\smpcore\fileserver\FileServerBuilder.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\DoubleParser.class
-me\ikevoodoo\smpcore\utils\CommandUtils.class
 me\ikevoodoo\smpcore\utils\ThreadUtils.class
 me\ikevoodoo\smpcore\config\annotations\ConfigType.class
+me\ikevoodoo\smpcore\utils\CommandManager.class
 me\ikevoodoo\smpcore\senders\SenderBuilder.class
 me\ikevoodoo\smpcore\text\messaging\Message.class
 me\ikevoodoo\smpcore\utils\health\HealthHandler.class
@@ -123,6 +122,7 @@ me\ikevoodoo\smpcore\events\TotemCheckEvent.class
 me\ikevoodoo\smpcore\items\CustomItem$CustomItemData.class
 me\ikevoodoo\smpcore\menus\functional\FunctionalMenu.class
 me\ikevoodoo\smpcore\SMPPlugin.class
+me\ikevoodoo\smpcore\utils\CommandManager$1.class
 me\ikevoodoo\smpcore\utils\Lazy.class
 me\ikevoodoo\smpcore\config\ConfigHelper.class
 me\ikevoodoo\smpcore\config\annotations\Config.class
