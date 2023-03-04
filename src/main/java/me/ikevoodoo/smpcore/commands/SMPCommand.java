@@ -4,7 +4,6 @@ import me.ikevoodoo.smpcore.SMPPlugin;
 import me.ikevoodoo.smpcore.commands.arguments.Argument;
 import me.ikevoodoo.smpcore.commands.arguments.ArgumentWrapper;
 import me.ikevoodoo.smpcore.commands.arguments.Arguments;
-import me.ikevoodoo.smpcore.commands.arguments.OptionalFor;
 import me.ikevoodoo.smpcore.shared.PluginProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -44,19 +43,23 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
             return true;
         }
 
-        Arguments arguments = new Arguments(sender, args);
-        if (!arguments.match(this.args)) {
+
+        Arguments arguments = new Arguments(sender, this.args, args);
+        var context = new Context<>(sender, arguments);
+        if (!arguments.match()) {
+            System.out.println("Arguments don't match!");
             if(args.length > 0) {
+                System.out.println("Argument length is " + args.length);
                 SMPCommand subCommand = this.subCommands.get(args[0]);
                 if(subCommand != null) {
-                    String msg = subCommand.getInvalidArgsMessage(sender, subCommand.name, arguments);
+                    String msg = subCommand.getInvalidArgsMessage(context, subCommand.name);
                     if(this.parent != null) {
                         sender.sendMessage(getInvalidArgsPrefix(sender, subCommand.name, arguments) + msg);
                         return true;
                     }
                 }
             }
-            sender.sendMessage(getInvalidArgsPrefix(sender, label, arguments) + getInvalidArgsMessage(sender, label, arguments));
+            sender.sendMessage(getInvalidArgsPrefix(sender, label, arguments) + getInvalidArgsMessage(context, label));
             return true;
         }
 
@@ -93,7 +96,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
             return subCommand.onCommand(sender, command, label, List.of(args).subList(1, args.length).toArray(new String[0]));
         }
 
-        boolean res = this.execute(new Context<>(sender, arguments));
+        boolean res = this.execute(context);
         if (res) {
             String successMessage = getSuccessMessage(sender, label, arguments);
             if(successMessage != null)
@@ -120,7 +123,7 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         if (strings.length - 1 > this.args.size()) sub = new ArrayList<>();
         else sub = this.args.subList(Math.max(0, strings.length - 1), this.args.size());
 
-        Arguments arguments = new Arguments(commandSender, strings);
+        Arguments arguments = new Arguments(commandSender, sub, strings);
         Context<?> ctx = new Context<>(commandSender, arguments);
 
         for (ArgumentWrapper wrapper : sub) {
@@ -151,8 +154,8 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
             return compatible;
         }
 
-        String[] border = getArgumentBorder(ctx.source(), arg);
-        compatible.add(border[0].trim() + arg.name() + border[1]);
+        var format = wrapper.getFormat(ctx);
+        compatible.add(format.formatted(arg.name()));
         return compatible;
     }
 
@@ -171,8 +174,35 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         return "§cUsage: §f/";
     }
 
-    public String getInvalidArgsMessage(CommandSender sender, String label, Arguments args) {
-        return "Not yet implemented, sorry!";
+    public String getInvalidArgsMessage(Context<?> context, String label) {
+        var differences = context.args().findDifferences(this.args);
+        var builder = new StringBuilder(label).append(" ");
+        var contextArgs = context.args();
+        var raw = contextArgs.getRaw();
+
+        for (int i = 0; i < raw.size(); i++) {
+            var difference = differences.get(i);
+            if (difference != null) {
+                builder.append(difference.getFlatTabCompletion(context)).append(" ");
+                continue;
+            }
+
+            builder.append(raw.get(i)).append(" ");
+        }
+
+        System.out.println("Raw Size: " + raw.size() + " Arg size: " + contextArgs.typeLength());
+
+        for (int i = raw.size(); i < contextArgs.typeLength(); i++) {
+            var difference = differences.get(i);
+            if (difference != null) {
+                builder.append(difference.getFlatTabCompletion(context)).append(" ");
+                continue;
+            }
+
+            builder.append(contextArgs.getArgument(i).getFlatTabCompletion(context)).append(" ");
+        }
+
+        return builder.toString().trim();
     }
 
     public String getSuccessMessage(CommandSender sender, String label, Arguments args) {
@@ -261,9 +291,9 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
         StringBuilder sb = new StringBuilder();
         for (ArgumentWrapper wrapper : args) {
             Argument argument = wrapper.getArgument();
-            String[] border = getArgumentBorder(sender, argument);
+
             if (!argument.required()) {
-                sb.append(border[0]).append(argument.name()).append(border[1]);
+                sb.append(wrapper.getFormat(sender).formatted(argument.name()));
             } else {
                 sb.append(" <").append(argument.name()).append(">");
             }
@@ -277,27 +307,6 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
 
     public final void setPermission(String permission) {
         this.permission = permission;
-    }
-
-    private String[] getArgumentBorder(CommandSender sender, Argument argument) {
-        OptionalFor optionalFor = argument.optionalFor();
-        if(optionalFor == OptionalFor.ALL) {
-            return new String[]{" [", "]"};
-        }
-
-        if(sender instanceof ConsoleCommandSender && optionalFor != OptionalFor.CONSOLE) {
-            return new String[] {" <", ">"};
-        }
-
-        if(sender instanceof Player && optionalFor != OptionalFor.PLAYER) {
-            return new String[] {" <", ">"};
-        }
-
-        if(sender instanceof BlockCommandSender && optionalFor != OptionalFor.COMMAND_BLOCK) {
-            return new String[] {" <", ">"};
-        }
-
-        return new String[] {" [", "]"};
     }
     
     public final List<String> getPaths() {

@@ -1,6 +1,5 @@
 package me.ikevoodoo.smpcore.commands.arguments;
 
-import me.ikevoodoo.smpcore.commands.arguments.parsers.BaseParser;
 import me.ikevoodoo.smpcore.commands.arguments.parsers.ParserRegistry;
 import org.bukkit.command.CommandSender;
 
@@ -14,19 +13,27 @@ public class Arguments implements Iterable<Integer> {
     private static final int SEARCHING_TOKEN = 2;
 
     private final List<String> args;
-    private List<ArgumentWrapper> types;
+    private final List<ArgumentWrapper> types;
     private final CommandSender sender;
 
-    public Arguments(CommandSender sender, String[] args) {
-        this.args = getArguments(String.join(" ", args));
+    public Arguments(CommandSender sender, List<ArgumentWrapper> types, String[] args) {
         this.sender = sender;
+        this.types = types;
+        this.args = getArguments(String.join(" ", args));
     }
 
-    public boolean match(List<ArgumentWrapper> args) {
-        types = args;
+    public int rawLength() {
+        return this.args.size();
+    }
+
+    public int typeLength() {
+        return this.types.size();
+    }
+
+    public boolean match() {
         int currIndex = 0;
 
-        for (ArgumentWrapper wrapper : args) {
+        for (ArgumentWrapper wrapper : types) {
             Argument arg = wrapper.getArgument();
             if(!has(arg.type())) {
                 return false;
@@ -48,29 +55,38 @@ public class Arguments implements Iterable<Integer> {
         return true;
     }
 
-    private int find(String name) {
-        int currIndex = 0;
+    public Map<Integer, ArgumentWrapper> findDifferences(List<ArgumentWrapper> args) {
+        var map = new HashMap<Integer, ArgumentWrapper>();
 
-        for (ArgumentWrapper wrapper : types) {
-            Argument arg = wrapper.getArgument();
-            if (arg.name().equalsIgnoreCase(name)) {
-                return currIndex;
+        var length = Math.min(this.types.size(), args.size());
+
+        for (int i = 0; i < length; i++) {
+            var arg = args.get(i);
+            var current = this.types.get(i);
+
+            var wrappedArg = arg.getArgument();
+            var currentArg = current.getArgument();
+
+            if (wrappedArg.type() != currentArg.type()) {
+                map.put(i, current);
+                continue;
             }
 
-            if(!has(arg.type())) {
-                return -1;
-            }
+            var wrappedParsed = this.get(i, wrappedArg.type());
+            var currentParsed = this.get(i, currentArg.type());
 
-            if (!is(currIndex, arg.type())) {
-                if (arg.required()) {
-                    return -1;
-                } else {
-                    continue;
-                }
+            if (!Objects.equals(wrappedParsed, currentParsed)) {
+                map.put(i, current);
             }
-            currIndex++;
         }
-        return -1;
+
+        if (length < this.types.size()) {
+            for (int i = length; i < this.types.size(); i++) {
+                map.put(i, this.types.get(i));
+            }
+        }
+
+        return map;
     }
 
     public boolean isEmpty() {
@@ -87,14 +103,17 @@ public class Arguments implements Iterable<Integer> {
     }
 
     public <T> T get(int index, Class<T> type) {
-        if (index >= args.size()) return null;
-        String data = args.get(index);
+        if (index < 0 || index >= this.args.size()) return null;
+
+        var data = this.args.get(index);
         if(type == String.class)
             return type.cast(data);
-        BaseParser<T> parser = ParserRegistry.get(type);
+
+        var parser = ParserRegistry.get(type);
         if (parser == null || !parser.canParse(data))
             return null;
-        return parser.parse(sender, data);
+
+        return parser.parse(this.sender, data);
     }
 
     public <T> T get(String name, Class<T> type) {
@@ -113,12 +132,20 @@ public class Arguments implements Iterable<Integer> {
 
     public <T> List<T> getAll(Class<T> type) {
         List<T> list = new ArrayList<>();
-        for (int i = 0; i < args.size(); i++) {
+        for (int i = 0; i < this.args.size(); i++) {
             if (is(i, type)) {
                 list.add(get(i, type));
             }
         }
         return list;
+    }
+
+    public List<String> getRaw() {
+        return Collections.unmodifiableList(this.args);
+    }
+
+    public ArgumentWrapper getArgument(int index) {
+        return this.types.get(index);
     }
 
     public boolean has(String name) {
@@ -208,5 +235,30 @@ public class Arguments implements Iterable<Integer> {
     @Override
     public Spliterator<Integer> spliterator() {
         return Iterable.super.spliterator();
+    }
+
+    private int find(String name) {
+        int currIndex = 0;
+
+        for (ArgumentWrapper wrapper : types) {
+            Argument arg = wrapper.getArgument();
+            if (arg.name().equalsIgnoreCase(name)) {
+                return currIndex;
+            }
+
+            if(!has(arg.type())) {
+                return -1;
+            }
+
+            if (!is(currIndex, arg.type())) {
+                if (arg.required()) {
+                    return -1;
+                } else {
+                    continue;
+                }
+            }
+            currIndex++;
+        }
+        return -1;
     }
 }
