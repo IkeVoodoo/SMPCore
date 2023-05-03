@@ -14,13 +14,10 @@ public class JoinActionHandler extends PluginProvider {
 
     public JoinActionHandler(SMPPlugin plugin) {
         super(plugin);
-        /*this.joinActions.putAll(joinActions);
-        this.joinListeners.addAll(joinListeners);*/
     }
 
-    public void runOnJoin(UUID id, SerializableConsumer<UUID> runnable) {
-        if (joinActions.containsKey(id)) joinActions.get(id).add(runnable);
-        else joinActions.put(id, new ArrayList<>(List.of(runnable)));
+    public void runOnceOnJoin(UUID id, SerializableConsumer<UUID> runnable) {
+        this.joinActions.computeIfAbsent(id, i -> new ArrayList<>()).add(runnable);
     }
 
     public SerializableConsumer<Player> runAlwaysOnJoin(SerializableConsumer<Player> runnable) {
@@ -32,16 +29,16 @@ public class JoinActionHandler extends PluginProvider {
         joinListeners.remove(runnable);
     }
 
-    public void fire(UUID id) {
+    public void fireAndRemove(UUID id) {
         if (joinActions.containsKey(id))
             joinActions.remove(id).forEach(uuidConsumer -> uuidConsumer.accept(id));
     }
 
-    public void fire(Player player) {
+    public void fireAlways(Player player) {
         joinListeners.forEach(consumer -> consumer.accept(player));
     }
 
-    public HashMap<UUID, List<SerializableConsumer<UUID>>> getJoinActions() {
+    public Map<UUID, List<SerializableConsumer<UUID>>> getJoinActions() {
         return joinActions;
     }
 

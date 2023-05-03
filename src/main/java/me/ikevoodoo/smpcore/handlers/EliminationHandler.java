@@ -187,7 +187,7 @@ public final class EliminationHandler extends PluginProvider {
         if (player.isOnline())
             this.revive(player.getPlayer());
         else {
-            getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), this::revive);
+            getPlugin().getJoinActionHandler().runOnceOnJoin(player.getUniqueId(), this::revive);
             removeFromCache(player.getUniqueId());
         }
     }
@@ -202,7 +202,7 @@ public final class EliminationHandler extends PluginProvider {
         if (player.isOnline())
             this.eliminate(player.getUniqueId(), eliminationData);
         else {
-            getPlugin().getJoinActionHandler().runOnJoin(player.getUniqueId(), id -> eliminate(id, eliminationData));
+            getPlugin().getJoinActionHandler().runOnceOnJoin(player.getUniqueId(), id -> eliminate(id, eliminationData));
             this.markEliminated(player.getUniqueId(), eliminationData);
         }
     }
