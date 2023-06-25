@@ -37,7 +37,7 @@ public class ResourcePackHandler extends PluginProvider {
 
         getPlugin().getCacheFolder().mkdirs();
 
-        File cacheFile = new File(getPlugin().getCacheFolder(), FileUtils.getName(file) + ".zip");
+        File cacheFile = new File(getPlugin().getCacheFolder(), FileUtils.stripFileExtension(file) + ".zip");
         if (cacheFile.exists()) {
             Files.deleteIfExists(cacheFile.toPath());
             cacheFile.createNewFile();
