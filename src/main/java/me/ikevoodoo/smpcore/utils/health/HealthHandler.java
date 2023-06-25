@@ -8,5 +8,8 @@ public interface HealthHandler {
     void setMaxHealth(LivingEntity entity, double maxHealth);
     void setMaxHealth(LivingEntity entity, double maxHealth, World world);
     double getMaxHealth(LivingEntity entity);
+    double getMaxHealth(LivingEntity entity, World world);
+
+    double updateMaxHealth(LivingEntity entity);
 
 }

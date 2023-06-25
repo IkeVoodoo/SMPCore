@@ -29,8 +29,20 @@ public final class HealthHelper {
         return this.getMaxHealth(entity) / 2;
     }
 
+    public double getMaxHealth(LivingEntity entity, World world) {
+        if (this.healthHandler == null) return 20.0;
+        if (world == null) return this.getMaxHealth(entity);
+
+        return this.healthHandler.getMaxHealth(entity, world);
+    }
+
+    public double getMaxHearts(LivingEntity entity, World world) {
+        return this.getMaxHealth(entity, world) / 2;
+    }
+
     public double setMaxHealth(LivingEntity entity, double amount, World world) {
         if (this.healthHandler == null) return 20.0;
+        if (world == null) return this.setMaxHealth(entity, amount);
 
         this.healthHandler.setMaxHealth(entity, amount, world);
         return amount;
@@ -69,7 +81,15 @@ public final class HealthHelper {
     }
 
     public double increaseMaxHearts(LivingEntity entity, double amount) {
-        return this.setMaxHearts(entity, this.getMaxHearts(entity) + amount * 2);
+        return this.increaseMaxHealth(entity, amount * 2);
+    }
+
+    public double increaseMaxHealth(LivingEntity entity, double amount, World world) {
+        return this.setMaxHealth(entity, this.getMaxHealth(entity, world) + amount, world);
+    }
+
+    public double increaseMaxHearts(LivingEntity entity, double amount, World world) {
+        return this.increaseMaxHealth(entity, amount * 2, world);
     }
 
     public double decreaseMaxHealth(LivingEntity entity, double amount) {
@@ -78,6 +98,14 @@ public final class HealthHelper {
 
     public double decreaseMaxHearts(LivingEntity entity, double amount) {
         return this.increaseMaxHearts(entity, -amount);
+    }
+
+    public double decreaseMaxHealth(LivingEntity entity, double amount, World world) {
+        return this.increaseMaxHealth(entity, -amount, world);
+    }
+
+    public double decreaseMaxHearts(LivingEntity entity, double amount, World world) {
+        return this.decreaseMaxHealth(entity, amount * 2, world);
     }
 
     public HealthSetResult increaseMaxHealthIfUnder(LivingEntity entity, double amount, double max) {
@@ -111,6 +139,39 @@ public final class HealthHelper {
 
     public HealthSetResult decreaseMaxHeartsIfOver(LivingEntity entity, double amount, double min) {
         return this.decreaseMaxHealthIfOver(entity, amount * 2, min * 2);
+    }
+
+    public HealthSetResult increaseMaxHealthIfUnder(LivingEntity entity, double amount, double max, World world) {
+        double health = this.getMaxHealth(entity, world);
+        double toSet = health + amount;
+
+        if (toSet > max) {
+            return new HealthSetResult(HealthSetResult.ABOVE_MAX, health, health);
+        }
+
+        double newHealth = this.setMaxHealth(entity, Math.min(toSet, max), world);
+        return new HealthSetResult(HealthSetResult.OK, health, newHealth);
+    }
+
+    public HealthSetResult increaseMaxHeartsIfUnder(LivingEntity entity, double amount, double max, World world) {
+        return this.increaseMaxHealthIfUnder(entity, amount * 2, max * 2, world);
+    }
+
+    public HealthSetResult decreaseMaxHealthIfOver(LivingEntity entity, double amount, double min, World world) {
+        double health = this.getMaxHealth(entity, world);
+        double val = health - amount;
+
+        if (val < min) {
+            return new HealthSetResult(HealthSetResult.BELOW_MIN, health, health);
+        }
+
+        double newHealth = this.setMaxHealth(entity, Math.max(val, min), world);
+
+        return new HealthSetResult(HealthSetResult.OK, health, newHealth);
+    }
+
+    public HealthSetResult decreaseMaxHeartsIfOver(LivingEntity entity, double amount, double min, World world) {
+        return this.decreaseMaxHealthIfOver(entity, amount * 2, min * 2, world);
     }
 
     public double updateHealth(Player player) {

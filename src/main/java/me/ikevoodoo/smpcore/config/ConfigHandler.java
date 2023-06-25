@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 
 public class ConfigHandler {
 
@@ -17,6 +18,14 @@ public class ConfigHandler {
         configs = new HashMap<>();
         yamlConfigs = new HashMap<>();
         this.plugin = plugin;
+    }
+
+    public List<String> listConfigs() {
+        return this.configs.keySet().stream().toList();
+    }
+
+    public List<String> listYmlConfigs() {
+        return this.yamlConfigs.keySet().stream().toList();
     }
 
     public void registerConfig(ConfigData config) {
@@ -41,7 +50,7 @@ public class ConfigHandler {
     }
 
     public File getFile(String name) {
-        return new File(plugin.getDataFolder(), name);
+        return new File(this.plugin.getDataFolder(), name);
     }
 
     public void reload() {

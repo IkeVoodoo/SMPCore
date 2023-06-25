@@ -107,7 +107,7 @@ public class Arguments implements Iterable<Integer> {
 
         var data = this.args.get(index);
         if(type == String.class)
-            return type.cast(data);
+            return type.cast(Objects.toString(data));
 
         var parser = ParserRegistry.get(type);
         if (parser == null || !parser.canParse(data))
@@ -150,7 +150,8 @@ public class Arguments implements Iterable<Integer> {
 
     public boolean has(String name) {
         int found = find(name);
-        return found > 0 && found < args.size();
+
+        return found >= 0 && found < args.size();
     }
 
     public String get(int index) {

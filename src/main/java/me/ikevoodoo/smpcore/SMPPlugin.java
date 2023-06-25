@@ -1,5 +1,6 @@
 package me.ikevoodoo.smpcore;
 
+import com.mojang.brigadier.CommandDispatcher;
 import me.ikevoodoo.smpcore.annotations.NoInject;
 import me.ikevoodoo.smpcore.annotations.Property;
 import me.ikevoodoo.smpcore.callbacks.blocks.PlayerPlaceBlockCallback;
@@ -32,6 +33,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -84,6 +86,7 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     private final Random random = new Random();
 
     private final HashMap<String, CustomItem> customItems = new HashMap<>();
+    private final CommandDispatcher<CommandSender> commandDispatcher = new CommandDispatcher<>();
 
 
     @Override
@@ -204,6 +207,10 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     public final JoinActionHandler getJoinActionHandler() {
         return joinActionHandler;
+    }
+
+    public final CommandDispatcher<CommandSender> getCommandDispatcher() {
+        return this.commandDispatcher;
     }
 
     public final InventoryActionHandler getInventoryActionHandler() {
