@@ -2,6 +2,7 @@ package me.ikevoodoo.smpcore.utils;
 
 import org.bukkit.ChatColor;
 
+import java.io.File;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
@@ -78,7 +79,7 @@ public class StringUtils {
     }
 
     public static String removeTrailingZeros(String string) {
-        return string.indexOf('.') > 0
+        return string.contains(".")
                 ? string.replaceAll("0*$", "").replaceAll("\\.$", "")
                 : string;
     }
@@ -171,6 +172,15 @@ public class StringUtils {
                     + Character.digit(hexString.charAt(i+1), 16));
         }
         return data;
+    }
+
+    public static String stripExtension(String name) {
+        var extensionSeparator = name.lastIndexOf('.');
+        if (extensionSeparator > 0) {
+            return name.substring(0, extensionSeparator);
+        }
+
+        return name;
     }
 
 }

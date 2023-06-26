@@ -63,13 +63,7 @@ public class FileUtils {
     }
 
     public static String stripFileExtension(File file) {
-        var name = file.getName();
-        var extensionSeparator = name.lastIndexOf('.');
-        if (extensionSeparator > 0) {
-            return name.substring(0, extensionSeparator);
-        }
-
-        return name;
+        return StringUtils.stripExtension(file.getName());
     }
 
 }
