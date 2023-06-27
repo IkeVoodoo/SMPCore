@@ -34,7 +34,7 @@ public class ConfigUtils {
 
             out.add((section.getCurrentPath() + "." + key)
                     .replaceAll("^" + Matcher.quoteReplacement(base) + "\\.?", "")
-                    .replaceAll(".$", ""));
+                    .replaceAll("\\.$", ""));
         }
 
         return out;

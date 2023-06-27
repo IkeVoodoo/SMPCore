@@ -183,4 +183,13 @@ public class StringUtils {
         return name;
     }
 
+    public static String getExtension(String name) {
+        var extensionSeparator = name.lastIndexOf('.');
+        if (extensionSeparator < name.length() - 1) {
+            return name.substring(extensionSeparator + 1);
+        }
+
+        return name;
+    }
+
 }

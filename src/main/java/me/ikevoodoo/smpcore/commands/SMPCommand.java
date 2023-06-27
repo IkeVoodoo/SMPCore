@@ -104,32 +104,36 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
     }
 
     @Override
-    public final List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        List<String> out = new ArrayList<>();
-        if(strings.length > 0) {
-            SMPCommand cmd = this.subCommands.get(strings[0]);
-            if (cmd != null) {
-                String[] subArgs = new String[strings.length - 1];
-                System.arraycopy(strings, 1, subArgs, 0, subArgs.length);
-                out.addAll(cmd.onTabComplete(commandSender, command, s, subArgs));
-                return out;
+    public final List<String> onTabComplete(CommandSender commandSender, Command cmd, String s, String[] args) {
+        if (args.length > 0) { // Try to pass the completion down the child tree
+            var sub = this.subCommands.get(args[0]);
+
+            if (sub != null) {
+                var subArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, subArgs, 0, subArgs.length);
+                return sub.onTabComplete(commandSender, cmd, s, subArgs);
             }
         }
-        this.subCommands.forEach((key, sub) -> out.add(key));
 
-        List<ArgumentWrapper> sub;
-        if (strings.length - 1 > this.args.size()) sub = new ArrayList<>();
-        else sub = this.args.subList(Math.max(0, strings.length - 1), this.args.size());
-
-        Arguments arguments = new Arguments(commandSender, sub, strings);
-        Context<?> ctx = new Context<>(commandSender, arguments);
-
-        for (ArgumentWrapper wrapper : sub) {
-            out.addAll(getCompatible(ctx, wrapper));
-            if (wrapper.getArgument().required()) break;
+        var output = new ArrayList<String>();
+        this.subCommands.forEach((name, command) -> output.add(name)); // Add all child names
+        if (this.args.isEmpty() && args.length == 1) {
+            return output;
         }
 
-        return out;
+        var lastArg = Math.max(args.length - 1, 0); // Ensure the last arg is a positive index!
+        if (lastArg >= this.args.size()) { // The user is typing more than they should!
+            return null;
+        }
+
+        Arguments arguments = new Arguments(commandSender, this.args, args);
+        Context<?> ctx = new Context<>(commandSender, arguments);
+
+        if (args.length > 0) {
+            output.addAll(getCompatible(ctx, this.args.get(lastArg))); // Use the last argument if it exists!
+        }
+
+        return output;
     }
 
     private List<String> getCompatible(Context<?> ctx, ArgumentWrapper wrapper) {

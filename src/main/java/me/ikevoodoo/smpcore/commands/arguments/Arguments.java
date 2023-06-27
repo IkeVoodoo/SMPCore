@@ -30,6 +30,14 @@ public class Arguments implements Iterable<Integer> {
         return this.types.size();
     }
 
+    public ArgumentWrapper first() {
+        return this.types.get(0);
+    }
+
+    public ArgumentWrapper last() {
+        return this.types.get(this.types.size() - 1);
+    }
+
     public boolean match() {
         int currIndex = 0;
 
