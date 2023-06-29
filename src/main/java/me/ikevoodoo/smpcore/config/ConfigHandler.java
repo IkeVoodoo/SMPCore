@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class ConfigHandler {
     }
 
     public boolean exists(String name) {
-        return this.configs.containsKey(name) && this.getConfigFile(name).exists();
+        return this.configs.containsKey(name) && this.getFile(name).exists();
     }
 
     public FileConfiguration getYmlConfig(String name) {
@@ -53,6 +54,10 @@ public class ConfigHandler {
         return new File(this.plugin.getDataFolder(), name);
     }
 
+    public void saveConfig(String name) throws IOException {
+        getYmlConfig(name).save(getFile(name));
+    }
+
     public void reload() {
         for (var config : this.configs.values()) {
             config.reload();
@@ -64,11 +69,8 @@ public class ConfigHandler {
     }
 
     private YamlConfiguration loadConfig(String name) {
-        return YamlConfiguration.loadConfiguration(getConfigFile(name));
+        return YamlConfiguration.loadConfiguration(getFile(name));
     }
 
-    private File getConfigFile(String name) {
-        return new File(this.plugin.getDataFolder(), name);
-    }
 
 }
