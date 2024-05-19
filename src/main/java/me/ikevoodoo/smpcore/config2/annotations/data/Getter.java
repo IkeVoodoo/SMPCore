@@ -1,4 +1,4 @@
-package me.ikevoodoo.smpcore.config.annotations;
+package me.ikevoodoo.smpcore.config2.annotations.data;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ListType {
+public @interface Getter {
 
-    Class<?> value();
+    String target() default "";
 
 }

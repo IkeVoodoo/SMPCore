@@ -1,6 +1,7 @@
 package me.ikevoodoo.smpcore.particles;
 
 import me.ikevoodoo.smpcore.math.helper.LineHelper;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -9,6 +10,7 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class PolygonParticleRenderer implements ParticleRendererBase {
 
@@ -89,6 +91,37 @@ public class PolygonParticleRenderer implements ParticleRendererBase {
         if (this.fill) {
 
             return;
+        }
+    }
+
+    private void sendParticles(Location start, Location end, Function<ParticleInfo, Consumer<Location>> spawnerCreator) {
+        if (this.edges) {
+            ParticleInfo previous = null;
+
+            for (var info : this.particles) {
+                var spawner = spawnerCreator.apply(info);
+
+                if (previous != null) {
+                    LineHelper.runOnLine(start, end, this.spacing, spawner);
+                    continue;
+                }
+
+                spawner.accept(info.location());
+            }
+
+            return;
+        }
+
+        for (var info : this.particles) {
+            if (info == null) continue;
+
+            var spawner = spawnerCreator.apply(info);
+
+            for (var otherInfo : this.particles) {
+                if (otherInfo == null || otherInfo == info) continue;
+
+                LineHelper.runOnLine(info.location(), otherInfo.location(), this.spacing, spawner);
+            }
         }
     }
 }

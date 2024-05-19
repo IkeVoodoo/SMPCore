@@ -156,7 +156,7 @@ public class MenuPage {
     }
 
     private Inventory createInventory() {
-        Inventory inventory = Bukkit.createInventory(null, this.size(), this.title().text());
+        Inventory inventory = Bukkit.createInventory(null, this.size(), this.title().legacyText());
         this.stacks.forEach(inventory::setItem);
         return inventory;
     }

@@ -55,7 +55,7 @@ public class RecipeLoader {
         if (choice instanceof RecipeChoice.MaterialChoice mat)
             return toReadable(mat.getChoices().get(0));
 
-        return "CONVERSION_ERROR";
+        throw new IllegalArgumentException("Recipe choice is neither an ExactChoice or a MaterialChoice, got " + (choice == null ? null : choice.getClass()));
     }
 
     private Material fromString(String mat) {

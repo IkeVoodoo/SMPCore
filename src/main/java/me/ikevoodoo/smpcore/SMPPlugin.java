@@ -8,22 +8,39 @@ import me.ikevoodoo.smpcore.callbacks.items.PlayerUseItemCallback;
 import me.ikevoodoo.smpcore.commands.SMPCommand;
 import me.ikevoodoo.smpcore.commands.functional.CommandCreator;
 import me.ikevoodoo.smpcore.commands.functional.FunctionalCommand;
-import me.ikevoodoo.smpcore.config.ConfigData;
-import me.ikevoodoo.smpcore.config.ConfigHandler;
 import me.ikevoodoo.smpcore.config.ConfigHelper;
-import me.ikevoodoo.smpcore.config.annotations.Config;
+import me.ikevoodoo.smpcore.config2.ConfigHandler;
+import me.ikevoodoo.smpcore.config2.Configuration;
+import me.ikevoodoo.smpcore.config2.annotations.Config;
 import me.ikevoodoo.smpcore.debug.LogCollector;
-import me.ikevoodoo.smpcore.handlers.*;
+import me.ikevoodoo.smpcore.handlers.EliminationHandler;
+import me.ikevoodoo.smpcore.handlers.InventoryActionHandler;
+import me.ikevoodoo.smpcore.handlers.JoinActionHandler;
+import me.ikevoodoo.smpcore.handlers.MenuHandler;
+import me.ikevoodoo.smpcore.handlers.ResourcePackHandler;
 import me.ikevoodoo.smpcore.handlers.chat.ChatInputHandler;
 import me.ikevoodoo.smpcore.items.CustomItem;
 import me.ikevoodoo.smpcore.items.functional.FunctionalItem;
 import me.ikevoodoo.smpcore.items.functional.ItemCreator;
-import me.ikevoodoo.smpcore.listeners.*;
+import me.ikevoodoo.smpcore.listeners.ChatMessageListener;
+import me.ikevoodoo.smpcore.listeners.InventoryEditListener;
+import me.ikevoodoo.smpcore.listeners.ItemDamageListener;
+import me.ikevoodoo.smpcore.listeners.MenuUpdateListener;
+import me.ikevoodoo.smpcore.listeners.PlayerConnectListener;
+import me.ikevoodoo.smpcore.listeners.PlayerDamageListener;
+import me.ikevoodoo.smpcore.listeners.PlayerPlaceListener;
+import me.ikevoodoo.smpcore.listeners.PlayerSleepListener;
+import me.ikevoodoo.smpcore.listeners.PlayerUseListener;
 import me.ikevoodoo.smpcore.menus.Menu;
 import me.ikevoodoo.smpcore.menus.functional.FunctionalMenu;
 import me.ikevoodoo.smpcore.menus.functional.MenuCreator;
 import me.ikevoodoo.smpcore.recipes.RecipeLoader;
-import me.ikevoodoo.smpcore.utils.*;
+import me.ikevoodoo.smpcore.senders.CustomSender;
+import me.ikevoodoo.smpcore.utils.CommandManager;
+import me.ikevoodoo.smpcore.utils.FileUtils;
+import me.ikevoodoo.smpcore.utils.NetworkUtils;
+import me.ikevoodoo.smpcore.utils.PDCUtils;
+import me.ikevoodoo.smpcore.utils.Pair;
 import me.ikevoodoo.smpcore.utils.health.HealthHelper;
 import me.ikevoodoo.smpcore.utils.random.MaterialUtils;
 import org.bukkit.Bukkit;
@@ -33,7 +50,6 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -49,12 +65,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.logging.Level;
 import java.util.stream.Stream;
-
-import static me.ikevoodoo.smpcore.senders.CustomSender.as;
-import static me.ikevoodoo.smpcore.senders.SenderBuilder.createNewSender;
 
 @SuppressWarnings("unused")
 public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, MenuCreator, ItemCreator {
@@ -81,7 +107,7 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
 
     private String serverIp;
 
-    private final CommandSender noLogConsole = createNewSender(as().noLog().console());
+    private final CommandSender noLogConsole = CustomSender.as().silent().console();
 
     private final Random random = new Random();
 
@@ -449,9 +475,14 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     private void registerDynamically() throws IOException, URISyntaxException {
         List<Class<?>> classes = getAllClasses(getClass().getPackage().getName());
         findConfigClasses(classes).forEach(clazz -> {
-            Config config = clazz.getAnnotation(Config.class);
-            ConfigData data = new ConfigData(this, config.value(), config.type(), clazz);
-            getConfigHandler().registerConfig(data);
+            var file = new File(getDataFolder(), String.join(".", Configuration.getNameForClass(clazz), "yml"));
+            System.out.println(file.getAbsolutePath() + " " + clazz.getName());
+            try {
+                getConfigHandler().registerConfig(Configuration.createConfiguration(clazz, file));
+            } catch (IOException e) {
+                getLogger().log(Level.SEVERE, "Unable to load config {}", clazz);
+                getLogger().log(Level.SEVERE, "Loading generated exception", e);
+            }
         });
         Pair<List<Listener>, List<SMPCommand>> toRegister = checkPackageForClasses(classes, Listener.class, SMPCommand.class);
         registerListeners(toRegister.getFirst());
@@ -488,7 +519,7 @@ public abstract class SMPPlugin extends JavaPlugin implements CommandCreator, Me
     }
 
     private List<Class<?>> findConfigClasses(List<Class<?>> classes) {
-        return classes == null ? new ArrayList<>() : classes.stream().filter(clazz -> clazz.isAnnotationPresent(Config.class)).toList();
+        return classes == null ? new ArrayList<>() : classes.stream().filter(clazz -> clazz.isAnnotationPresent(Config.class) && clazz.getDeclaringClass() == null).toList();
     }
 
     private List<Class<?>> findItemClasses(List<Class<?>> classes) {

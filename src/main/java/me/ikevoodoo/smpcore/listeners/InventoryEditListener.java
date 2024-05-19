@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.PlayerInventory;
 
 public class InventoryEditListener implements Listener {
@@ -18,8 +19,14 @@ public class InventoryEditListener implements Listener {
     @EventHandler
     public void on(InventoryEvent event) {
         if(event.getInventory() instanceof PlayerInventory inventory) {
-            plugin.getInventoryActionHandler().callInventoryAction(inventory.getHolder() instanceof Player player ? player : null);
+            this.plugin.getInventoryActionHandler().callInventoryAction(inventory.getHolder() instanceof Player player ? player : null);
         }
     }
 
+    @EventHandler
+    public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+        if (this.plugin.getMenuHandler().get(event.getPlayer()) != null) {
+            event.setCancelled(true);
+        }
+    }
 }

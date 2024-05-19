@@ -27,13 +27,22 @@ public abstract class SMPCommand extends PluginProvider implements CommandExecut
     public SMPCommand(SMPPlugin plugin, String name, String permission) {
         super(plugin);
         this.name = name;
-        this.permission = permission;
+        if (this.name == null || this.name.isEmpty() || this.name.isBlank()) {
+            throw new IllegalStateException("No name for command " + getClass().getSimpleName());
+        }
+
+        this.permission = permission == null ? null : (permission.isEmpty() || permission.isBlank() ? null : permission);
+
         this.subCommands = new HashMap<>();
         this.cooldowns = new HashMap<>();
     }
 
     public SMPCommand(SMPPlugin plugin, String name) {
         this(plugin, name, null);
+    }
+
+    public SMPCommand(SMPPlugin plugin, Map<String, Object> values) {
+        this(plugin, (String) values.getOrDefault("name", ""), (String) values.getOrDefault("permission", ""));
     }
 
     @Override

@@ -5,8 +5,8 @@ import me.ikevoodoo.smpcore.callbacks.items.PlayerUseItemCallback;
 import me.ikevoodoo.smpcore.functions.SerializableConsumer;
 import me.ikevoodoo.smpcore.recipes.RecipeData;
 import me.ikevoodoo.smpcore.recipes.RecipeOptions;
+import me.ikevoodoo.smpcore.shared.PluginProvider;
 import me.ikevoodoo.smpcore.text.messaging.Message;
-import me.ikevoodoo.smpcore.utils.PDCUtils;
 import me.ikevoodoo.smpcore.utils.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,7 +31,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
-public abstract class CustomItem {
+public abstract class CustomItem extends PluginProvider {
 
     private static class CustomItemData {
         private Supplier<String> displayName = () -> null;
@@ -55,13 +55,11 @@ public abstract class CustomItem {
 
     private Supplier<RecipeOptions> optionsSupplier = () -> new RecipeOptions(Material.STONE, 1, true);
 
-    private final SMPPlugin plugin;
-
     private boolean enabled = true;
     private File recipeFIle;
 
     protected CustomItem(SMPPlugin plugin, String id, Message friendlyName) {
-        this.plugin = plugin;
+        super(plugin);
         this.id = id;
         this.friendlyName = friendlyName;
     }
@@ -181,7 +179,7 @@ public abstract class CustomItem {
 
     public final CustomItem unlockOnJoin() {
         clearConsumers();
-        unlockOnJoin = this.plugin.getJoinActionHandler().runAlwaysOnJoin(player -> {
+        unlockOnJoin = getPlugin().getJoinActionHandler().runAlwaysOnJoin(player -> {
             NamespacedKey key = recipe == null ? null : recipe.getFirst();
             if(key == null)
                 return;
@@ -192,7 +190,7 @@ public abstract class CustomItem {
 
     public final CustomItem unlockOnObtain(Material... materials) {
         clearConsumers();
-        unlockOnObtain = this.plugin.getInventoryActionHandler().onInventoryAction(player -> {
+        unlockOnObtain = getPlugin().getInventoryActionHandler().onInventoryAction(player -> {
             Inventory inventory = player.getInventory();
             for (Material material : materials) {
                 if(!inventory.contains(material)) {
@@ -218,9 +216,9 @@ public abstract class CustomItem {
     public final CustomItem addKey(String key) {
         if (key == null)
             throw new IllegalArgumentException("Key cannot be null");
-        NamespacedKey namespacedKey = new NamespacedKey(this.plugin, key);
+        var namespacedKey = makeKey(key);
         keys.add(namespacedKey);
-        this.plugin.onUse(key, new PlayerUseItemCallback() {
+        getPlugin().onUse(key, new PlayerUseItemCallback() {
             @Override
             public boolean useItem(Player player, ItemStack item, Action action) {
                 ItemClickResult result = tryClick(player, item, action);
@@ -343,7 +341,7 @@ public abstract class CustomItem {
     }
 
     public final CustomItem bindConfigOptions(String config, String path) {
-        optionsSupplier = () -> this.plugin.getRecipeLoader().getOptions(this.plugin.getConfigHandler().getYmlConfig(config).getConfigurationSection(path));
+        optionsSupplier = () -> getPlugin().getRecipeLoader().getOptions(getYmlConfig(config).getConfigurationSection(path));
         return this;
     }
 
@@ -360,15 +358,7 @@ public abstract class CustomItem {
     }
 
     public final FileConfiguration getConfig() {
-        return plugin.getConfig();
-    }
-
-    public final NamespacedKey makeKey(String key) {
-        return new NamespacedKey(plugin, key);
-    }
-
-    public final SMPPlugin getPlugin() {
-        return plugin;
+        return getPlugin().getConfig();
     }
 
     @Override
@@ -378,9 +368,9 @@ public abstract class CustomItem {
 
     private void clearConsumers() {
         if(unlockOnJoin != null)
-            this.plugin.getJoinActionHandler().cancelAlwaysOnJoin(unlockOnJoin);
+            getPlugin().getJoinActionHandler().cancelAlwaysOnJoin(unlockOnJoin);
         if(unlockOnObtain != null)
-            this.plugin.getInventoryActionHandler().removeInventoryAction(unlockOnObtain);
+            getPlugin().getInventoryActionHandler().removeInventoryAction(unlockOnObtain);
 
         unlockOnJoin = null;
         unlockOnObtain = null;

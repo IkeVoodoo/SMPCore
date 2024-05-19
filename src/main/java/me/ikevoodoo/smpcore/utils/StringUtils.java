@@ -17,6 +17,14 @@ public class StringUtils {
 
     }
 
+    public static String lowercaseFirst(String s) {
+        if (s.isBlank()) return s;
+
+        if (s.length() == 1) return s.toLowerCase(Locale.ROOT);
+
+        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+    }
+
     public static String color(String s) {
         if (s == null) return null;
         return ChatColor.translateAlternateColorCodes('&', s);

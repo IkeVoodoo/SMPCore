@@ -1,8 +1,11 @@
 package me.ikevoodoo.smpcore.text.messaging;
 
-import me.ikevoodoo.smpcore.text.messaging.utils.MessageUtils;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Content;
 
 import java.util.ArrayList;
@@ -39,12 +42,12 @@ public class MessageBuilder {
 
     // Starts a component
     public MessageBuilder add() {
-        messageComponents.add(new MessageComponent());
+        this.messageComponents.add(new MessageComponent());
         return this;
     }
 
     public MessageBuilder add(String text) {
-        return addComponent(MessageUtils.toTextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', text))));
+        return addComponent(new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', text))));
     }
 
     public MessageBuilder addPlain(String text) {
@@ -61,7 +64,6 @@ public class MessageBuilder {
     }
 
     public MessageBuilder text(String text) {
-
         last().setText(text);
         return this;
     }
@@ -113,8 +115,8 @@ public class MessageBuilder {
 
     public Message build() {
         // https://www.spigotmc.org/wiki/the-chat-component-api/
-        ComponentBuilder componentBuilder = new ComponentBuilder();
-        for (MessageComponent messageComponent : messageComponents) {
+        var componentBuilder = new ComponentBuilder();
+        for (MessageComponent messageComponent : this.messageComponents) {
             componentBuilder
                     .append(messageComponent.getText())
                     .color(messageComponent.getColor())
@@ -137,58 +139,34 @@ public class MessageBuilder {
     }
 
     private MessageComponent last() {
-        if(messageComponents.isEmpty())
+        if(this.messageComponents.isEmpty())
             throw new IllegalStateException("No components added! Did you forget to call MessageBuilder#add()?");
-        return messageComponents.get(messageComponents.size() - 1);
-    }
-
-    private List<TextDecorInfo> getInfo(String text) {
-        int offset = 0;
-
-        List<MessageProperty> globalProperties = new ArrayList<>();
-
-        while (offset < text.length()) {
-            String sub = text.substring(offset);
-            if (sub.startsWith("[[")) {
-                String prop = sub.substring(2, Math.max(sub.indexOf(']'), 1));
-                System.out.println(prop);
-            }
-        }
-
-        return List.of();
+        return this.messageComponents.get(this.messageComponents.size() - 1);
     }
 
     private MessageBuilder addComponent(BaseComponent comp) {
         addPlain(comp.toLegacyText())
                 .color(comp.getColor());
 
-        ClickEvent event = comp.getClickEvent();
+        var event = comp.getClickEvent();
         if (event != null) {
             click(event.getAction(), event.getValue());
         }
 
-        HoverEvent hoverEvent = comp.getHoverEvent();
+        var hoverEvent = comp.getHoverEvent();
         if (event != null) {
             hover(hoverEvent.getAction(), hoverEvent.getContents().toArray(new Content[0]));
         }
 
-        if (comp.isBold())
-            properties(MessageProperty.BOLD);
+        var properties = last().getProperties();
 
-        if (comp.isItalic())
-            properties(MessageProperty.ITALIC);
+        MessageProperty.forEachApplying(comp, property -> {
+            if (property == MessageProperty.RESET) return;
 
-        if (comp.isObfuscated())
-            properties(MessageProperty.OBFUSCATED);
+            properties.add(property);
+        });
 
-        if (comp.isStrikethrough())
-            properties(MessageProperty.STRIKETHROUGH);
-
-        if (comp.isUnderlined())
-            properties(MessageProperty.UNDERLINE);
         return this;
     }
 
 }
-
-record TextDecorInfo(List<MessageProperty> properties, String text, ChatColor color) { }

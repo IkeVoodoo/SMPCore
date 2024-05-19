@@ -20,8 +20,8 @@ public class NMSReflectionHelper {
         return getCraftWorldData().getClazz().cast(world);
     }
 
-    public static ClassData getCraftWorldData() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException {
-        return ReflectionHelper.get(getCraftWorldClass());
+    public static ReflectionHelper.ClassData getCraftWorldData() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException {
+        return ReflectionHelper.getClassData(getCraftWorldClass());
     }
 
     public static Class<?> getCraftWorldClass() throws ClassNotFoundException {

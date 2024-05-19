@@ -1,6 +1,5 @@
 package me.ikevoodoo.smpcore.text.messaging;
 
-import me.ikevoodoo.smpcore.text.messaging.utils.MessageUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -14,56 +13,68 @@ import java.util.List;
 public class Message {
 
     private final TextComponent msg;
-    private final List<BaseComponent> comps = new ArrayList<>();
+    private final List<BaseComponent> textComponents = new ArrayList<>();
+    private final List<BaseComponent> textComponentsView = Collections.unmodifiableList(this.textComponents);
 
     protected Message(BaseComponent[] components) {
-        Collections.addAll(this.comps, components);
-        this.msg = MessageUtils.toTextComponent(components);
+        Collections.addAll(this.textComponents, components);
+        this.msg = new TextComponent(components);
     }
 
     public List<BaseComponent> components() {
-        return new ArrayList<>(this.comps);
+        return this.textComponentsView;
     }
 
     public TextComponent component() {
         return this.msg.duplicate();
     }
 
-    public String text() {
+    public String legacyText() {
         return this.msg.toLegacyText();
     }
 
     public Message send(Player player) {
-        player.spigot().sendMessage(msg);
+        player.spigot().sendMessage(this.msg);
         return this;
     }
 
     public Message broadcast() {
-        for(Player player : Bukkit.getOnlinePlayers())
-            player.spigot().sendMessage(msg);
-        return log();
+        Bukkit.getOnlinePlayers().forEach(this::send);
+        return sendToConsole();
     }
 
     public Message broadcast(String permission) {
-        for (Player player : Bukkit.getOnlinePlayers())
-            if (player.hasPermission(permission))
-                player.spigot().sendMessage(msg);
-        return log();
+        for (var player : Bukkit.getOnlinePlayers()) {
+            if (!player.hasPermission(permission)) continue;
+
+            this.send(player);
+        }
+
+        return sendToConsole();
     }
 
     public Message broadcast(World world) {
-        for (Player player : world.getPlayers())
-            player.spigot().sendMessage(msg);
-        return log();
+        world.getPlayers().forEach(this::send);
+        return sendToConsole();
+    }
+
+    public Message broadcast(World world, String permission) {
+        for (var player : world.getPlayers()) {
+            if (!player.hasPermission(permission)) continue;
+
+            this.send(player);
+        }
+
+        return sendToConsole();
     }
     
-    public Message log() {
-        Bukkit.getConsoleSender().sendMessage(msg.toLegacyText());
+    public Message sendToConsole() {
+        Bukkit.getConsoleSender().sendMessage(this.msg.toLegacyText());
         return this;
     }
 
-    public Message log(String prefix) {
-        Bukkit.getConsoleSender().sendMessage(prefix + msg.toLegacyText());
+    public Message sendToConsole(String prefix) {
+        Bukkit.getConsoleSender().sendMessage(prefix + this.msg.toLegacyText());
         return this;
     }
 

@@ -89,7 +89,7 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
                 if (stack == null) stack = new ItemStack(Material.STONE);
                 ItemMeta meta = stack.getItemMeta();
                 if (name != null && meta != null)
-                    meta.setDisplayName(name.get().text());
+                    meta.setDisplayName(name.get().legacyText());
                 stack.setItemMeta(meta);
                 return stack;
             }
@@ -109,7 +109,7 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
     private List<String> getLore() {
         return this.loreSuppliers
                 .stream()
-                .map(supplier -> supplier.get().text())
+                .map(supplier -> supplier.get().legacyText())
                 .collect(Collectors.toList());
     }
 

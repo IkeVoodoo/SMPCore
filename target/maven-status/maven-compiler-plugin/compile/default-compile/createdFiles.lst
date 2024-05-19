@@ -15,6 +15,7 @@ me\ikevoodoo\smpcore\utils\HealthUtils$SetResult.class
 me\ikevoodoo\smpcore\functional\loop\FunctionalLoopBase.class
 me\ikevoodoo\smpcore\listeners\ItemDamageListener$1.class
 me\ikevoodoo\smpcore\text\messaging\MessageComponent.class
+me\ikevoodoo\smpcore\commands\CoreCommand.class
 me\ikevoodoo\smpcore\config\annotations\LongDefault.class
 me\ikevoodoo\smpcore\listeners\ChatMessageListener.class
 me\ikevoodoo\smpcore\config\annotations\BooleanDefault.class
@@ -23,6 +24,7 @@ me\ikevoodoo\smpcore\security\CodeGenerator.class
 me\ikevoodoo\smpcore\annotations\Property.class
 me\ikevoodoo\smpcore\menus\MenuHolder.class
 me\ikevoodoo\smpcore\commands\arguments\Argument.class
+me\ikevoodoo\smpcore\config2\ConfigHandler.class
 me\ikevoodoo\smpcore\math\utils\MathUtils.class
 me\ikevoodoo\smpcore\reflection\ReflectionHelper.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\BaseParser.class
@@ -45,6 +47,7 @@ me\ikevoodoo\smpcore\commands\arguments\OptionalFor.class
 me\ikevoodoo\smpcore\menus\ItemData.class
 me\ikevoodoo\smpcore\recipes\RecipeData.class
 me\ikevoodoo\smpcore\utils\NetworkUtils.class
+me\ikevoodoo\smpcore\updating\AutoUpdater.class
 me\ikevoodoo\smpcore\senders\SenderBuilder$1.class
 me\ikevoodoo\smpcore\commands\arguments\ArgumentWrapper.class
 me\ikevoodoo\smpcore\utils\RecipeUtils.class
@@ -83,18 +86,20 @@ me\ikevoodoo\smpcore\items\CustomItem$1.class
 me\ikevoodoo\smpcore\math\helper\PositionHelper.class
 me\ikevoodoo\smpcore\commands\arguments\Arguments.class
 me\ikevoodoo\smpcore\listeners\PlayerSleepListener.class
+me\ikevoodoo\smpcore\commands\arguments\parsers\WorldParser.class
 me\ikevoodoo\smpcore\items\ItemEntity.class
 me\ikevoodoo\smpcore\reflection\NMSReflectionHelper.class
 me\ikevoodoo\smpcore\handlers\placeholders\PlaceholderBuilder$1.class
-me\ikevoodoo\smpcore\reflection\ClassData.class
 me\ikevoodoo\smpcore\menus\v2\Page.class
 me\ikevoodoo\smpcore\listeners\SMPListener.class
 me\ikevoodoo\smpcore\menus\v2\PagedMenu.class
+me\ikevoodoo\smpcore\updating\UpdateData.class
 me\ikevoodoo\smpcore\commands\arguments\Arguments$1.class
 me\ikevoodoo\smpcore\utils\PDCUtils.class
 me\ikevoodoo\smpcore\text\messaging\utils\MessageUtils.class
 me\ikevoodoo\smpcore\debug\LogCollector$LogHandler.class
 me\ikevoodoo\smpcore\commands\arguments\parsers\BooleanParser.class
+me\ikevoodoo\smpcore\config\ConfigUtils.class
 me\ikevoodoo\smpcore\items\CustomItem.class
 me\ikevoodoo\smpcore\utils\health\HealthHelper.class
 me\ikevoodoo\smpcore\utils\StringUtils.class
@@ -126,7 +131,6 @@ me\ikevoodoo\smpcore\utils\CommandManager$1.class
 me\ikevoodoo\smpcore\utils\Lazy.class
 me\ikevoodoo\smpcore\config\ConfigHelper.class
 me\ikevoodoo\smpcore\config\annotations\Config.class
-me\ikevoodoo\smpcore\reflection\Test.class
 me\ikevoodoo\smpcore\utils\URLUtils.class
 me\ikevoodoo\smpcore\items\functional\ItemCreator.class
 me\ikevoodoo\smpcore\text\messaging\TextDecorInfo.class
@@ -156,3 +160,4 @@ me\ikevoodoo\smpcore\utils\random\MaterialUtils.class
 me\ikevoodoo\smpcore\particles\ParticleInfo.class
 me\ikevoodoo\smpcore\commands\functional\CommandReturn.class
 me\ikevoodoo\smpcore\recipes\RecipeOptions.class
+me\ikevoodoo\smpcore\updating\UpdateVersionData.class

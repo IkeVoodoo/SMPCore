@@ -304,12 +304,7 @@ public class ConfigData {
         var listType = field.getAnnotation(ListType.class);
         if (listType == null) return null;
 
-        var className = listType.value();
-        if (className.isEmpty() || className.isBlank()) {
-            throw new IllegalStateException("ListType cannot be blank!");
-        }
-
-        return Class.forName(className);
+        return listType.value();
     }
 
     private Object getValue(Field field, Object instance) throws IllegalAccessException {
