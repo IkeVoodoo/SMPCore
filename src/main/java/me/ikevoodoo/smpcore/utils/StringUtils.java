@@ -34,11 +34,15 @@ public class StringUtils {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
+    private static int distance(String a, String b) {
+        return (int) LEVENSHTEIN.distance(a, b);
+    }
+
     public static String getClosest(String input, String[] options) {
         List<Pair<Integer, String>> distances = new ArrayList<>();
 
         for(String s : options) {
-            distances.add(new Pair<>((int) LEVENSHTEIN.distance(input.toUpperCase(Locale.ROOT), s.toUpperCase(Locale.ROOT)), s));
+            distances.add(new Pair<>(distance(input.toUpperCase(Locale.ROOT), s.toUpperCase(Locale.ROOT)), s));
         }
 
         return distances.stream()
