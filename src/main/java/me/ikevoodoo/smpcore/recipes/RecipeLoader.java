@@ -137,7 +137,7 @@ public class RecipeLoader {
             var propertyStart = matName.indexOf('[');
             var propertyEnd = matName.indexOf(']');
 
-            String propertyString = null;
+            String propertyString = "";
             String materialString = matName;
 
             if (propertyStart != -1 && propertyEnd != -1) {
