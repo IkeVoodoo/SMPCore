@@ -64,13 +64,15 @@ public class RecipeLoader {
                 }
             }
 
-            readableType += "[";
-            var modelData = meta.getCustomModelData();
-            if (modelData != 0) {
-                readableType += "customModelData=" + modelData;
-            }
+            if (meta.hasCustomModelData()) {
+                readableType += "[";
+                var modelData = meta.getCustomModelData();
+                if (modelData != 0) {
+                    readableType += "customModelData=" + modelData;
+                }
 
-            readableType += "]";
+                readableType += "]";
+            }
         }
 
         return readableType;
@@ -98,7 +100,8 @@ public class RecipeLoader {
 
         var properties = propertyString.split(",");
         for (var property : properties) {
-            var split = property.split(":");
+            var split = property.split("=");
+            if (split.length == 1) continue;
             var name = split[0];
             var value = split[1];
 
@@ -142,7 +145,7 @@ public class RecipeLoader {
 
             if (propertyStart != -1 && propertyEnd != -1) {
                 propertyString = matName.substring(propertyStart + 1, propertyEnd);
-                materialString = matName.substring(propertyStart);
+                materialString = matName.substring(0, propertyStart);
             }
 
             String name = StringUtils.toEnumCompatible(materialString);
