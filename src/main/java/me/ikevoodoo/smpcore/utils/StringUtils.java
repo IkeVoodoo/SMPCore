@@ -93,10 +93,41 @@ public class StringUtils {
     }
 
     public static long parseBanTime(String timeString) {
-        return DateTimeFormatter
-                .ofPattern("HH:mm:ss.SSSS", Locale.ROOT)
-                .parse(timeString, TemporalQueries.localTime())
-                .getLong(ChronoField.MILLI_OF_DAY);
+        var split = timeString.split(":");
+        if (split.length != 3) {
+            return -1;
+        }
+
+        var splitTime = new String[4];
+        splitTime[0] = split[0];
+        splitTime[1] = split[1];
+        splitTime[3] = "0";
+
+        if (split[2].contains(".")) {
+            var split2 = split[2].split("\\.");
+            splitTime[2] = split2[0];
+            splitTime[3] = split2[1];
+        } else {
+            splitTime[2] = split[2];
+        }
+
+        var hours = parseLongSafe(splitTime[0]);
+        if (hours < 0)
+            return -2;
+
+        var minutes = parseLongSafe(splitTime[1]);
+        if (minutes < 0)
+            return -3;
+
+        var seconds = parseLongSafe(splitTime[2]);
+        if (seconds < 0)
+            return -4;
+
+        var millis = parseLongSafe(splitTime[3]);
+        if (millis < 0)
+            return -5;
+
+        return hours * 3600000L + minutes * 60000L + seconds * 1000L + millis;
     }
 
     public static String formatTime(long end) {
@@ -183,6 +214,14 @@ public class StringUtils {
         }
 
         return name;
+    }
+
+    private static long parseLongSafe(String str) {
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            return Long.MIN_VALUE;
+        }
     }
 
 }
