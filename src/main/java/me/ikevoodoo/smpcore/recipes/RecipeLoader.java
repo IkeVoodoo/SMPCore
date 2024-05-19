@@ -150,15 +150,13 @@ public class RecipeLoader {
             int index = Integer.parseInt(key);
 
             Optional<CustomItem> itemOptional = plugin.getItem(name.toLowerCase(Locale.ROOT));
+            int idx = Math.max(0, Math.min(index - 1, choices.length - 1));
             if (itemOptional.isPresent()) {
                 CustomItem item = itemOptional.get();
                 ItemStack stack = item.getItemStack();
                 if (stack == null) continue;
 
-
-
-                if(index > 0 && index <= choices.length) choices[index - 1] = new RecipeChoice.ExactChoice(stack);
-                else choices[Math.min(index, choices.length - 1)] = new RecipeChoice.ExactChoice(stack);
+                choices[idx] = new RecipeChoice.ExactChoice(stack);
                 continue;
             }
 
@@ -170,7 +168,6 @@ public class RecipeLoader {
 
             var stack = createStack(mat, propertyString);
 
-            var idx = Math.max(0, Math.min(index - 1, choices.length - 1));
             if (stack != null) {
                 choices[idx] = new RecipeChoice.ExactChoice(stack);
             } else {
