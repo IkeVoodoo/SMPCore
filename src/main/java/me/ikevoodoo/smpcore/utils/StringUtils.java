@@ -161,7 +161,7 @@ public class StringUtils {
         if (seconds > 0)
             stringBuilder.append(fixedNumberLength(seconds, 2)).append(" seconds");
 
-        if (stringBuilder.length() == 0)
+        if (stringBuilder.isEmpty())
             stringBuilder.append("now");
         return stringBuilder.toString();
     }
