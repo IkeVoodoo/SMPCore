@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,9 +49,36 @@ public class RecipeLoader {
                 .replace(":", "");
     }
 
+    private String toReadable(ItemStack stack) {
+        var readableType = toReadable(stack.getType());
+
+        var meta = stack.getItemMeta();
+        if (meta != null) {
+            var pdc = meta.getPersistentDataContainer();
+            for (var key : pdc.getKeys()) {
+                try {
+                    pdc.get(key, PersistentDataType.BYTE); // A hack to filter for type, smh
+                    return key.getKey();
+                } catch (IllegalArgumentException ignored) {
+
+                }
+            }
+
+            readableType += "[";
+            var modelData = meta.getCustomModelData();
+            if (modelData != 0) {
+                readableType += "customModelData=" + modelData;
+            }
+
+            readableType += "]";
+        }
+
+        return readableType;
+    }
+
     private String toReadable(RecipeChoice choice) {
         if (choice instanceof RecipeChoice.ExactChoice exact)
-            return toReadable(exact.getItemStack().getType());
+            return toReadable(exact.getItemStack());
 
         if (choice instanceof RecipeChoice.MaterialChoice mat)
             return toReadable(mat.getChoices().get(0));
@@ -60,6 +88,28 @@ public class RecipeLoader {
 
     private Material fromString(String mat) {
         return Material.getMaterial(fix(mat));
+    }
+
+    private ItemStack createStack(Material material, String propertyString) {
+        var stack = new ItemStack(material);
+
+        var meta = stack.getItemMeta();
+        if (meta == null || propertyString.isEmpty()) return null;
+
+        var properties = propertyString.split(",");
+        for (var property : properties) {
+            var split = property.split(":");
+            var name = split[0];
+            var value = split[1];
+
+            switch (name) {
+                case "customModelData" -> meta.setCustomModelData(Integer.parseInt(value));
+            }
+        }
+
+        stack.setItemMeta(meta);
+
+        return stack;
     }
 
     /**
@@ -84,7 +134,18 @@ public class RecipeLoader {
             if(matName == null)
                 continue;
 
-            String name = StringUtils.toEnumCompatible(matName);
+            var propertyStart = matName.indexOf('[');
+            var propertyEnd = matName.indexOf(']');
+
+            String propertyString = null;
+            String materialString = matName;
+
+            if (propertyStart != -1 && propertyEnd != -1) {
+                propertyString = matName.substring(propertyStart + 1, propertyEnd);
+                materialString = matName.substring(propertyStart);
+            }
+
+            String name = StringUtils.toEnumCompatible(materialString);
 
             int index = Integer.parseInt(key);
 
@@ -93,6 +154,9 @@ public class RecipeLoader {
                 CustomItem item = itemOptional.get();
                 ItemStack stack = item.getItemStack();
                 if (stack == null) continue;
+
+
+
                 if(index > 0 && index <= choices.length) choices[index - 1] = new RecipeChoice.ExactChoice(stack);
                 else choices[Math.min(index, choices.length - 1)] = new RecipeChoice.ExactChoice(stack);
                 continue;
@@ -103,8 +167,15 @@ public class RecipeLoader {
             } catch (IllegalArgumentException e) {
                 plugin.getLogger().log(Level.SEVERE, "Invalid material: {0}", matName);
             }
-            if(index > 0 && index <= choices.length) choices[index - 1] = new RecipeChoice.MaterialChoice(mat);
-            else choices[Math.min(index, choices.length - 1)] = new RecipeChoice.MaterialChoice(mat);
+
+            var stack = createStack(mat, propertyString);
+
+            var idx = Math.max(0, Math.min(index - 1, choices.length - 1));
+            if (stack != null) {
+                choices[idx] = new RecipeChoice.ExactChoice(stack);
+            } else {
+                choices[idx] = new RecipeChoice.MaterialChoice(mat);
+            }
         }
 
         for (int i = 0; i < choices.length; i++) {
