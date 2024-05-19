@@ -26,7 +26,7 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
     private Supplier<Message> name;
 
     private final List<Supplier<Message>> loreSuppliers = new ArrayList<>();
-    private final List<BiConsumer<Player, ItemStack>> consumers = new ArrayList<>();
+    private final List<FunctionalItemClickHandler> consumers = new ArrayList<>();
 
     protected FunctionalItem(SMPPlugin plugin) {
         super(plugin);
@@ -57,9 +57,16 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
         return this;
     }
 
-    public FunctionalItem bind(BiConsumer<Player, ItemStack> consumer) {
-        this.consumers.add(consumer);
+    public FunctionalItem bind(FunctionalItemClickHandler handler) {
+        this.consumers.add(handler);
         return this;
+    }
+
+    public FunctionalItem bind(BiConsumer<Player, ItemStack> consumer) {
+        return this.bind((player, stack, result) -> {
+            consumer.accept(player, stack);
+            return result;
+        });
     }
 
     public FunctionalItem lore(Supplier<Message> supplier) {
@@ -96,10 +103,12 @@ public class FunctionalItem extends PluginProvider implements FunctionalLoopBase
 
             @Override
             protected ItemClickResult onClick(Player player, ItemStack itemStack, Action action) {
-                for (BiConsumer<Player, ItemStack> consumer : consumers)
-                    consumer.accept(player, itemStack);
+                var result = super.onClick(player, itemStack, action);
+                for (var consumer : consumers) {
+                    result = consumer.onClick(player, itemStack, result);
+                }
 
-                return super.onClick(player, itemStack, action);
+                return result;
             }
         }.addKey(this.id + "_key").setLore(this::getLore);
         item.reload();

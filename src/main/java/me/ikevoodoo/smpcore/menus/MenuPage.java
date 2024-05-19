@@ -7,7 +7,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -20,6 +26,7 @@ public class MenuPage {
     private PageData data;
 
     private boolean allowItemActivation = true;
+    private boolean allowNormalItemPickup = false;
 
     protected MenuPage(PageData data, Menu menu) {
         this.data = data;
@@ -47,6 +54,14 @@ public class MenuPage {
 
     public void allowItemActivation(boolean allow) {
         this.allowItemActivation = allow;
+    }
+
+    public boolean allowNormalItemPickup() {
+        return this.allowNormalItemPickup;
+    }
+
+    public void allowNormalItemPickup(boolean allow) {
+        this.allowNormalItemPickup = allow;
     }
 
     public Optional<ItemStack> item(int slot) {
