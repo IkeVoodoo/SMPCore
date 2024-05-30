@@ -2,13 +2,13 @@ package me.ikevoodoo.smpcore.caching;
 
 import me.ikevoodoo.smpcore.utils.NumberUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class FastUUIDCache {
 

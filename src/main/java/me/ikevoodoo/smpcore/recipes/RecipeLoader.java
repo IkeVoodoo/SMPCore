@@ -124,7 +124,7 @@ public class RecipeLoader {
      *
      * */
     private RecipeChoice[] getChoices(ConfigurationSection config, String path) {
-        RecipeChoice[] choices = Arrays.stream(new RecipeChoice[9]).map(m -> new RecipeChoice.MaterialChoice(Material.AIR)).toArray(RecipeChoice[]::new);
+        RecipeChoice[] choices = new RecipeChoice[9];
 
         if(!config.isConfigurationSection(path))
             return choices;
@@ -169,6 +169,8 @@ public class RecipeLoader {
                 plugin.getLogger().log(Level.SEVERE, "Invalid material: {0}", matName);
             }
 
+            if (mat.isAir()) continue;
+
             var stack = createStack(mat, propertyString);
 
             if (stack != null) {
@@ -179,7 +181,13 @@ public class RecipeLoader {
         }
 
         for (int i = 0; i < choices.length; i++) {
-            config.set(path + "." + (i + 1) + ".item", toReadable(choices[i]));
+            var confPath = path + "." + (i + 1) + ".item";
+            if (choices[i] == null) {
+                config.set(confPath, "air");
+                continue;
+            }
+
+            config.set(confPath, toReadable(choices[i]));
         }
 
         return choices;
@@ -198,12 +206,16 @@ public class RecipeLoader {
     }
 
     public RecipeData getRecipe(ConfigurationSection config, String path, ItemStack output, NamespacedKey key, boolean shaped) {
-        RecipeChoice[] choices = getChoices(config, path);
+        var choices = getChoices(config, path);
         if(shaped) {
-            ShapedRecipe recipe = new ShapedRecipe(key, output);
-            recipe.shape("012", "345", "678");
-            for(int i = 0; i < choices.length; i++)
+            var recipe = new ShapedRecipe(key, output);
+
+            recipe.shape(createRecipeStrings(choices));
+            for(int i = 0; i < choices.length; i++) {
+                if (choices[i] == null) continue;
+
                 recipe.setIngredient((i + "").charAt(0), choices[i]);
+            }
             return new RecipeData(recipe, getMats(choices), choices);
         }
 
@@ -239,7 +251,7 @@ public class RecipeLoader {
         RecipeChoice[] choices = recipe.choices();
         for(int i = 0; i < choices.length; i++) {
             String key = String.valueOf(i + 1);
-            Optional<Object> replacement = getReplacement(key, replacements);
+            var replacement = getReplacement(key, replacements);
             config.set("recipe." + key + ".item", replacement.orElse(toReadable(choices[i])));
         }
         config.set("options.type", toReadable(recipe.recipe().getResult().getType()));
@@ -250,6 +262,27 @@ public class RecipeLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String[] createRecipeStrings(RecipeChoice[] choices) {
+        var str = new String[choices.length / 3];
+
+        for(int i = 0; i < choices.length; i++) {
+            var choice = choices[i];
+            var idx = (int) Math.floor(i / 3D);
+
+            if (str[idx] == null) {
+                str[idx] = "";
+            }
+
+            if (choice == null) {
+                str[idx] += " ";
+            } else {
+                str[idx] += i + "";
+            }
+        }
+
+        return str;
     }
 
     private Optional<Object> getReplacement(String key, RecipeReplacement... replacements) {

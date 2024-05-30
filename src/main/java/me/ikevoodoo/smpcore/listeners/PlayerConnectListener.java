@@ -48,7 +48,7 @@ public class PlayerConnectListener implements Listener {
 
     @EventHandler
     public void on(PlayerQuitEvent e) {
-        if (removeQuitMessage.remove(e.getPlayer().getUniqueId())) {
+        if (this.removeQuitMessage.remove(e.getPlayer().getUniqueId())) {
             e.setQuitMessage("");
         }
     }

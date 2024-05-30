@@ -15,6 +15,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Optional;
+
 public class MenuUpdateListener extends SMPListener {
 
     public MenuUpdateListener(SMPPlugin plugin) {
@@ -25,17 +27,22 @@ public class MenuUpdateListener extends SMPListener {
     public void on(InventoryClickEvent event) {
         if(!(event.getWhoClicked() instanceof Player player)) return;
 
+        Menu menu = getPlugin().getMenuHandler().get(player);
+        if (menu == null) return;
+
+        Optional<MenuPage> optionalPage = menu.page(player);
+        if (optionalPage.isEmpty()) {
+            return;
+        }
+
+        MenuPage page = optionalPage.get();
+
         if (shouldDisallowAction(event.getAction())) {
             event.setResult(Event.Result.DENY);
             return;
         }
 
         if (event.getView().getBottomInventory() == event.getClickedInventory()) return;
-
-        Menu menu = getPlugin().getMenuHandler().get(player);
-        if (menu == null) return;
-
-        MenuPage page = menu.page(player).orElseThrow();
 
         ItemStack item = event.getCurrentItem();
         if(item == null || item.getType().isAir())
